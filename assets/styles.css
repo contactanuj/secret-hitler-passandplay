@@ -191,3 +191,7 @@ select {
 .badge.party-fascist { background: var(--fas); color: #fff; border-color: var(--fas); }
 .badge.party-communist { background: var(--comm); color: #1a1206; border-color: var(--comm); }
 .badge.ai { background: #26303a; color: #9fb6c8; border-color: #3a4654; }
+
+/* timed reveal countdown */
+.countdown { text-align: center; color: var(--muted); font-size: 13px; margin: 8px 0 4px; }
+.countdown .cd-num { display: inline-block; min-width: 22px; font-weight: 800; color: var(--gold); font-size: 16px; }

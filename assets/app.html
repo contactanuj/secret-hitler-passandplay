@@ -202,6 +202,10 @@ select {
 .badge.party-communist { background: var(--comm); color: #1a1206; border-color: var(--comm); }
 .badge.ai { background: #26303a; color: #9fb6c8; border-color: #3a4654; }
 
+/* timed reveal countdown */
+.countdown { text-align: center; color: var(--muted); font-size: 13px; margin: 8px 0 4px; }
+.countdown .cd-num { display: inline-block; min-width: 22px; font-weight: 800; color: var(--gold); font-size: 16px; }
+
   </style>
 </head>
 <body>
@@ -1411,6 +1415,8 @@ select {
   var view = 'home';   // 'home' | 'setup' | 'rules' | 'game' | 'log'
   var ui = {};         // transient per-screen UI state (not persisted meaningfully)
   var lastScreenKey = null; // for scroll-to-top only on real screen changes
+  var revealTimer = null;   // setInterval handle for the timed secret reveal
+  var REVEAL_SECONDS = 8;   // a revealed role auto-hides after this many seconds
 
   // Inline SVG icons (render identically across WebViews, unlike emoji).
   var GEAR_SVG = '<svg class="ic" viewBox="0 0 24 24" width="17" height="17" fill="currentColor"><path d="M19.4 13c.04-.33.06-.66.06-1s-.02-.67-.06-1l2.11-1.65a.5.5 0 0 0 .12-.64l-2-3.46a.5.5 0 0 0-.6-.22l-2.49 1a7.3 7.3 0 0 0-1.73-1l-.38-2.65A.49.49 0 0 0 14 2h-4a.49.49 0 0 0-.5.42l-.38 2.65c-.63.26-1.21.6-1.73 1l-2.49-1a.5.5 0 0 0-.6.22l-2 3.46a.5.5 0 0 0 .12.64L4.6 11c-.04.33-.06.66-.06 1s.02.67.06 1l-2.11 1.65a.5.5 0 0 0-.12.64l2 3.46c.14.24.42.32.6.22l2.49-1c.52.4 1.1.74 1.73 1l.38 2.65c.04.24.25.42.5.42h4c.25 0 .46-.18.5-.42l.38-2.65c.63-.26 1.21-.6 1.73-1l2.49 1c.18.1.46.02.6-.22l2-3.46a.5.5 0 0 0-.12-.64L19.4 13ZM12 15.5A3.5 3.5 0 1 1 12 8.5a3.5 3.5 0 0 1 0 7Z"/></svg>';
@@ -1503,6 +1509,8 @@ select {
       (u.gate ? ':g' : '') + (u.voterGate ? ':vg' : '') +
       (u.revealIntro ? ':in' : '') + (u.revealShown ? ':sh' : '') +
       (u.powerResult ? ':pr' : '') + (u.conversionReveal ? ':cr' : '') +
+      (u.gameMenu ? ':menu' : '') +
+      (u.recheck ? ':rc' + u.recheck.stage + (u.recheck.pid || '') : '') +
       (u.revealIdx != null ? ':r' + u.revealIdx : '') +
       (u.voteIdx != null ? ':v' + u.voteIdx : '');
   }
@@ -1707,7 +1715,7 @@ select {
       renderPresetChips(),
       '<div class="panel">',
       '<h3>Players</h3>',
-      stepperRow('Number of players', 'playerCount', draft.playerCount, 2, 15),
+      stepperRow('Number of players', 'playerCount', draft.playerCount, 5, 10),
       stepperRow('Bots (AI players)', 'bots', draft.bots || 0, 0, draft.playerCount - 1),
       (draft.bots || 0) > 0 ? '<p class="small muted">AI seats play automatically. With bots, voting is on-device (table voting needs all-human).</p>' : '',
       '<label>Human names (seating order)</label>',
@@ -1725,7 +1733,8 @@ select {
 
       renderValidation(v),
 
-      '<button class="btn primary" data-action="startGame"' + (v.ok ? '' : ' disabled') + '>Deal roles &amp; start</button>',
+      '<button class="btn primary" data-action="startGame"' + (v.ok ? '' : ' disabled') + '>' +
+        (v.ok ? 'Deal roles &amp; start' : 'Fix ' + v.errors.length + ' issue' + (v.errors.length === 1 ? '' : 's') + ' to start') + '</button>',
       '<button class="btn ghost" data-action="resetDefaults">Reset to official defaults</button>'
     ].join('');
   }
@@ -1765,16 +1774,17 @@ select {
         powerOptionsIndexed(p, isLast, i) + '</span></div>';
     }).join('');
     var commOn = (d.roles.communists || 0) > 0;
-    var roleTotal = d.roles.liberals + d.roles.fascists + (d.roles.communists || 0) + 1;
+    var fascMax = Math.max(1, d.playerCount - (d.roles.communists || 0) - 2); // keep Liberals >= 1
 
     return [
       '<div class="spacer"></div>',
       '<h3>Roles</h3>',
-      stepperRow('Liberals', 'roles.liberals', d.roles.liberals, 0, 14),
-      stepperRow('Fascists (excl. Hitler)', 'roles.fascists', d.roles.fascists, 0, 13),
-      commOn ? '<div class="kv small muted"><span>Communists</span><span>' + d.roles.communists + ' (see below)</span></div>' : '',
-      '<div class="kv small muted"><span>Hitler</span><span>1 (always)</span></div>',
-      '<div class="kv small"><span>Total</span><span>' + roleTotal + ' / ' + d.playerCount + '</span></div>',
+      '<p class="small muted">Liberals fill the rest automatically, so the roles always match the player count.</p>',
+      '<div class="kv"><span>Liberals <span class="muted">(auto)</span></span><span><b>' + d.roles.liberals + '</b></span></div>',
+      stepperRow('Fascists (excl. Hitler)', 'roles.fascists', d.roles.fascists, 1, fascMax),
+      commOn ? '<div class="kv"><span>Communists</span><span><b>' + d.roles.communists + '</b> <span class="small muted">(set below)</span></span></div>' : '',
+      '<div class="kv"><span>Hitler</span><span>1</span></div>',
+      '<div class="kv small"><span>Total</span><span>' + d.playerCount + ' / ' + d.playerCount + '</span></div>',
       checkboxRow('Hitler knows the Fascists (night phase)', 'hitlerKnowsFascists', d.hitlerKnowsFascists),
 
       '<div class="spacer"></div>',
@@ -1812,7 +1822,7 @@ select {
       '<div class="spacer"></div>',
       '<h3>Communist faction (XL)</h3>',
       '<div class="row" style="margin-top:8px"><div class="grow small">Add a third Communist faction — experimental</div><button class="iconbtn" data-action="toggleCommunists">' + (commOn ? 'On' : 'Off') + '</button></div>',
-      commOn ? stepperRow('Communists', 'roles.communists', d.roles.communists, 1, 6) : '',
+      commOn ? stepperRow('Communists', 'roles.communists', d.roles.communists, 1, Math.max(1, d.playerCount - d.roles.fascists - 2)) : '',
       commOn ? stepperRow('Communist tiles in deck', 'deck.communist', d.deck.communist, 0, 30) : '',
       commOn ? stepperRow('Communist policies to win', 'win.communist', d.win.communist, 1, 12) : '',
       commOn ? checkboxRow('Communists know each other', 'communistsKnowEachOther', d.communistsKnowEachOther) : '',
@@ -1858,6 +1868,8 @@ select {
   function renderGame() {
     if (G.phase === 'reveal') return renderReveal();
     if (G.phase === 'game_over') return renderGameOver();
+    if (ui.gameMenu) return renderGameMenu();
+    if (ui.recheck) return renderRecheck();
 
     // A resolved power (investigate/peek) has already advanced the engine to the
     // next round, but its PRIVATE result must still be shown to the President.
@@ -1896,7 +1908,7 @@ select {
       default: body = '<div class="panel">Unknown phase: ' + esc(G.phase) + '</div>';
     }
     return [
-      topbar('Round ' + G.round, '<button class="iconbtn" data-action="viewLog">Log</button> <button class="iconbtn" data-action="openSettings" aria-label="Settings">' + GEAR_SVG + '</button> <button class="iconbtn" data-action="menu">Menu</button>'),
+      topbar('Round ' + G.round, '<button class="iconbtn" data-action="viewLog">Log</button> <button class="iconbtn" data-action="menu">Menu</button>'),
       renderBoard(),
       body
     ].join('');
@@ -2011,14 +2023,21 @@ select {
     if (!ui.revealShown) {
       return passScreen(p.name, 'Make sure only ' + esc(p.name) + ' can see the screen.', 'I am ' + esc(p.name) + ' — show my role', 'revealShow');
     }
+    return [
+      topbar('Secret roles', ''),
+      roleCardContent(p),
+      countdownBar(),
+      '<button class="btn primary" data-action="revealNext">Hide &amp; pass to next</button>'
+    ].join('');
+  }
 
+  // Private role-card content — used by the night reveal AND the in-game re-check.
+  function roleCardContent(p) {
     var info = SH.revealInfo(G, p.id);
     var roleLabel = info.role === 'hitler' ? 'HITLER' : info.role.toUpperCase();
     var knows = '';
     if (info.knows.length) {
-      knows = '<div class="note"><b>You know:</b><br>' + info.knows.map(function (k) {
-        return esc(k.name) + ' — ' + esc(k.label);
-      }).join('<br>') + '</div>';
+      knows = '<div class="note"><b>You know:</b><br>' + info.knows.map(function (k) { return esc(k.name) + ' — ' + esc(k.label); }).join('<br>') + '</div>';
     } else if (info.role === 'hitler') {
       knows = '<div class="note">You do not know your Fascists. Earn their trust and stay hidden.</div>';
     } else if (info.role === 'liberal') {
@@ -2031,17 +2050,65 @@ select {
     else if (info.role === 'communist') teamNote = 'You win by enacting ' + G.config.win.communist + ' Communist Policies — a third team, neither Liberal nor Fascist.';
     else teamNote = 'You win by enacting ' + G.config.win.fascist + ' Fascist Policies, or by electing Hitler Chancellor after ' + G.config.hitlerChancellorThreshold + ' Fascist Policies.';
     var teamLabel = info.role === 'liberal' ? 'Liberal team' : (info.role === 'communist' ? 'Communist team' : 'Fascist team');
-
     return [
-      topbar('Secret roles', ''),
       '<div class="rolecard ' + info.role + ' flip">',
       '<div class="muted">' + esc(p.name) + ', you are</div>',
       '<div class="big">' + roleLabel + '</div>',
       '<div class="small">' + teamLabel + '</div>',
       '</div>',
       knows,
-      '<p class="small muted">' + teamNote + '</p>',
-      '<button class="btn primary" data-action="revealNext">Hide &amp; pass to next player</button>'
+      '<p class="small muted">' + teamNote + '</p>'
+    ].join('');
+  }
+
+  function countdownBar() {
+    var n = ui.revealCount != null ? ui.revealCount : REVEAL_SECONDS;
+    return '<div class="countdown"><span class="cd-num">' + n + '</span> hides automatically for privacy</div>';
+  }
+  function startRevealCountdown(onExpire) {
+    stopRevealCountdown();
+    ui.revealCount = REVEAL_SECONDS;
+    revealTimer = setInterval(function () {
+      ui.revealCount = (ui.revealCount || 1) - 1;
+      if (ui.revealCount <= 0) { stopRevealCountdown(); onExpire(); }
+      else render();
+    }, 1000);
+  }
+  function stopRevealCountdown() {
+    if (revealTimer) { try { clearInterval(revealTimer); } catch (e) {} revealTimer = null; }
+    ui.revealCount = null;
+  }
+  function doRevealNext() { stopRevealCountdown(); ui.revealIdx++; ui.revealShown = false; render(); }
+  function doRecheckDone() { stopRevealCountdown(); ui.recheck = null; render(); }
+
+  // ---- In-game re-check (safe: gated, single human, timed, bots excluded) ----
+  function renderRecheck() {
+    var r = ui.recheck;
+    if (r.stage === 'pick') {
+      var btns = G.players.filter(function (p) { return !p.isBot; }).map(function (p) {
+        return '<button class="btn" data-action="recheckPick" data-arg="' + p.id + '">' + esc(p.name) + (p.alive ? '' : ' <span class="small muted">(out)</span>') + '</button>';
+      }).join('');
+      return [
+        topbar('Check a role', '<button class="iconbtn" data-action="recheckCancel">Cancel</button>'),
+        '<div class="panel"><h2>Whose role?</h2><p class="muted">Tap your own name — your role shows privately and auto-hides. (AI seats are hidden.)</p>' + btns + '</div>'
+      ].join('');
+    }
+    var p = SH.getPlayer(G, r.pid);
+    if (r.stage === 'gate') {
+      return [topbar('Check a role', '<button class="iconbtn" data-action="recheckCancel">Cancel</button>'),
+        passScreen(p.name, 'Make sure only ' + esc(p.name) + ' can see the screen.', 'I am ' + esc(p.name) + ' — show my role', 'recheckReveal')].join('');
+    }
+    return [topbar('Check a role', ''), roleCardContent(p), countdownBar(),
+      '<button class="btn primary" data-action="recheckDone">Hide</button>'].join('');
+  }
+
+  function renderGameMenu() {
+    return [
+      topbar('Menu', '<button class="iconbtn" data-action="closeMenu">Close</button>'),
+      '<button class="btn" data-action="recheckStart">Check a role</button>',
+      '<button class="btn" data-action="viewLog">Event log</button>',
+      '<button class="btn" data-action="openSettings">Settings</button>',
+      '<button class="btn ghost" data-action="quitHome">Quit to home (game is saved)</button>'
     ].join('');
   }
 
@@ -2355,11 +2422,11 @@ select {
     try { if (settings.sound && window.SHSound) window.SHSound.resume(); } catch (e) {}
     switch (action) {
       // navigation
-      case 'home': view = 'home'; G = null; render(); break;
+      case 'home': stopRevealCountdown(); view = 'home'; G = null; render(); break;
       case 'rules': view = 'rules'; render(); break;
       case 'newgame': draft = null; ui = {}; view = 'setup'; render(); break;
       case 'resume': G = loadSaved(); ui = {}; view = 'game'; render(); break;
-      case 'menu': if (confirm('Quit this game and return home? Progress is saved and resumable.')) { view = 'home'; render(); } break;
+      case 'menu': ui.gameMenu = true; render(); break;
       case 'viewLog': ui._returnView = 'game'; view = 'log'; render(); break;
       case 'backToGame': view = 'game'; render(); break;
       case 'backFromRules': view = (G ? 'game' : 'home'); render(); break;
@@ -2387,9 +2454,17 @@ select {
 
       // reveal
       case 'revealStart': ui.revealIntro = false; render(); break;
-      case 'revealShow': ui.revealShown = true; sfx('reveal'); render(); break;
-      case 'revealNext': ui.revealIdx++; ui.revealShown = false; render(); break;
-      case 'beginPlay': SH.beginPlay(G); save(); ui = {}; render(); break;
+      case 'revealShow': ui.revealShown = true; sfx('reveal'); startRevealCountdown(doRevealNext); render(); break;
+      case 'revealNext': doRevealNext(); break;
+      case 'beginPlay': stopRevealCountdown(); SH.beginPlay(G); save(); ui = {}; render(); break;
+      // in-game re-check of one's own role (safe: gated + timed + bots excluded)
+      case 'recheckStart': ui.gameMenu = false; ui.recheck = { stage: 'pick' }; render(); break;
+      case 'recheckPick': ui.recheck = { stage: 'gate', pid: arg }; render(); break;
+      case 'recheckReveal': ui.recheck.stage = 'show'; sfx('reveal'); startRevealCountdown(doRecheckDone); render(); break;
+      case 'recheckDone': doRecheckDone(); break;
+      case 'recheckCancel': stopRevealCountdown(); ui.recheck = null; render(); break;
+      case 'closeMenu': ui.gameMenu = false; render(); break;
+      case 'quitHome': if (confirm('Quit this game and return home? Progress is saved and resumable.')) { stopRevealCountdown(); ui = {}; view = 'home'; render(); } break;
 
       // generic gate
       case 'ungate': ui.gate = false; sfx('pass'); render(); break;
@@ -2574,9 +2649,12 @@ select {
     if (path === 'win.fascist') {
       SH.reconcileBoard(draft); // resize board to match
     }
+    if (path === 'roles.fascists') {
+      draft.roles.liberals = Math.max(1, draft.playerCount - next - (draft.roles.communists || 0) - 1);
+    }
     if (path === 'roles.communists') {
       // keep the head-count summing by taking from / giving back to Liberals
-      draft.roles.liberals = Math.max(0, draft.playerCount - draft.roles.fascists - next - 1);
+      draft.roles.liberals = Math.max(1, draft.playerCount - draft.roles.fascists - next - 1);
     }
     if (path === 'win.communist') {
       reconcileCommunistBoard(draft);

@@ -244,5 +244,32 @@ UI.setView('home'); UI.render();
 UI.handle('newgame'); UI.handle('applyPreset', 'fast'); expectRendered('apply preset');
 ok(UI.state().draft.electionTrackerMax === 2, 'fast preset applied to draft');
 
+// advanced config stays valid through toggles; roles always sum to the player count
+UI.handle('toggleAdvanced'); expectRendered('advanced open');
+UI.handle('toggleCommunists'); expectRendered('communists on');
+(function () {
+  var d = UI.state().draft;
+  ok(SH.validateConfig(d).ok, 'communists-on draft is valid');
+  ok(d.roles.liberals + d.roles.fascists + d.roles.communists + 1 === d.playerCount, 'roles sum to player count (XL on)');
+})();
+UI.handle('toggleCommunists');
+ok(SH.validateConfig(UI.state().draft).ok, 'communists-off draft is valid');
+
+// in-game menu + safe re-check role flow (gated, timed, bots excluded)
+(function () {
+  var d = SH.defaultConfig(6); d.bots = 2; d.votingMode = 'secret';
+  UI.setDraft(d); UI.handle('startGame');
+  UI.handle('revealStart');
+  for (var i = 0; i < 4; i++) { UI.handle('revealShow'); UI.handle('revealNext'); } // 4 humans reveal
+  UI.handle('beginPlay');
+  UI.handle('menu'); ok(UI.state().ui.gameMenu === true, 'menu opens'); expectRendered('game menu');
+  UI.handle('recheckStart'); ok(UI.state().ui.recheck.stage === 'pick', 'recheck: pick stage'); expectRendered('recheck pick');
+  var human = UI.state().G.players.filter(function (p) { return !p.isBot; })[0];
+  UI.handle('recheckPick', human.id); ok(UI.state().ui.recheck.stage === 'gate', 'recheck: gate stage');
+  UI.handle('recheckReveal'); ok(UI.state().ui.recheck.stage === 'show', 'recheck: show stage'); expectRendered('recheck show');
+  UI.handle('recheckDone'); ok(!UI.state().ui.recheck, 'recheck cleared after done');
+  ok(UI.state().G.phase !== 'game_over', 'game continues after re-check');
+})();
+
 console.log('\n' + (fail === 0 ? 'ALL PASSED' : 'FAILURES PRESENT') + ': ' + pass + ' passed, ' + fail + ' failed.');
 process.exit(fail === 0 ? 0 : 1);
