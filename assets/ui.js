@@ -18,6 +18,7 @@
   var draft = null;    // setup config being edited
   var view = 'home';   // 'home' | 'setup' | 'rules' | 'game' | 'log'
   var ui = {};         // transient per-screen UI state (not persisted meaningfully)
+  var lastScreenKey = null; // for scroll-to-top only on real screen changes
 
   // Inline SVG icons (render identically across WebViews, unlike emoji).
   var GEAR_SVG = '<svg class="ic" viewBox="0 0 24 24" width="17" height="17" fill="currentColor"><path d="M19.4 13c.04-.33.06-.66.06-1s-.02-.67-.06-1l2.11-1.65a.5.5 0 0 0 .12-.64l-2-3.46a.5.5 0 0 0-.6-.22l-2.49 1a7.3 7.3 0 0 0-1.73-1l-.38-2.65A.49.49 0 0 0 14 2h-4a.49.49 0 0 0-.5.42l-.38 2.65c-.63.26-1.21.6-1.73 1l-2.49-1a.5.5 0 0 0-.6.22l-2 3.46a.5.5 0 0 0 .12.64L4.6 11c-.04.33-.06.66-.06 1s.02.67.06 1l-2.11 1.65a.5.5 0 0 0-.12.64l2 3.46c.14.24.42.32.6.22l2.49-1c.52.4 1.1.74 1.73 1l.38 2.65c.04.24.25.42.5.42h4c.25 0 .46-.18.5-.42l.38-2.65c.63-.26 1.21-.6 1.73-1l2.49 1c.18.1.46.02.6-.22l2-3.46a.5.5 0 0 0-.12-.64L19.4 13ZM12 15.5A3.5 3.5 0 1 1 12 8.5a3.5 3.5 0 0 1 0 7Z"/></svg>';
@@ -91,9 +92,27 @@
     else if (view === 'game') html = renderGame();
     else html = renderHome();
     app.innerHTML = html;
-    app.scrollTop = 0;
-    window.scrollTo(0, 0);
+    // Only jump to the top on a genuine screen change — NOT on every re-render —
+    // so input within a screen (steppers, votes, board taps) keeps your scroll spot.
+    var key = screenKey();
+    if (key !== lastScreenKey) {
+      app.scrollTop = 0;
+      try { window.scrollTo(0, 0); } catch (e) {}
+      lastScreenKey = key;
+    }
     scheduleBots();
+  }
+
+  // Identifies "which screen" is shown, so re-renders of the same screen don't scroll.
+  function screenKey() {
+    if (view !== 'game' || !G) return view;
+    var u = ui;
+    return 'game:' + G.phase +
+      (u.gate ? ':g' : '') + (u.voterGate ? ':vg' : '') +
+      (u.revealIntro ? ':in' : '') + (u.revealShown ? ':sh' : '') +
+      (u.powerResult ? ':pr' : '') + (u.conversionReveal ? ':cr' : '') +
+      (u.revealIdx != null ? ':r' + u.revealIdx : '') +
+      (u.voteIdx != null ? ':v' + u.voteIdx : '');
   }
 
   // ===========================================================================
