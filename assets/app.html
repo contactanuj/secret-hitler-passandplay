@@ -1188,6 +1188,11 @@ select {
   function team(role) { return role === 'liberal' ? 'liberal' : (role === 'communist' ? 'communist' : 'fascist'); }
   function rnd() { return Math.random(); }
 
+  // Playstyle for legislative/voting/nomination. Hitler behaves like a LIBERAL to stay
+  // hidden (enacts Liberal, blends), even though Hitler is on the Fascist team. Win-
+  // oriented logic still uses the real team via knowledge().
+  function style(role) { return (role === 'liberal' || role === 'hitler') ? 'liberal' : (role === 'communist' ? 'communist' : 'fascist'); }
+
   // What this bot legitimately knows from the night phase.
   function knowledge(state, botId) {
     var me = player(state, botId), cfg = state.config, allies = {}, i, p;
@@ -1227,19 +1232,21 @@ select {
   function nominate(state, botId, eligibleIds) {
     if (!eligibleIds || !eligibleIds.length) return null;
     var k = knowledge(state, botId), cfg = state.config;
-    if (k.team === 'fascist') {
+    if (k.role === 'fascist') {
+      // win shot: elect Hitler once the threshold is reached
       if (state.fascistPolicies >= cfg.hitlerChancellorThreshold) {
         for (var i = 0; i < eligibleIds.length; i++) if (player(state, eligibleIds[i]).role === 'hitler') return eligibleIds[i];
       }
-      var allyIds = eligibleIds.filter(function (id) { return k.allies[id]; });
-      if (allyIds.length) return allyIds[Math.floor(rnd() * allyIds.length)];
-      return pickExtreme(eligibleIds, function (id) { return lean(state, id); }, false);
+      // otherwise pick a trusted-looking Chancellor so the government passes — the
+      // fascist President then forces a Fascist policy via the discard.
+      return pickExtreme(eligibleIds, function (id) { return lean(state, id) + rnd() * 0.3; }, false);
     }
-    if (k.team === 'communist') {
+    if (k.role === 'communist') {
       var cAlly = eligibleIds.filter(function (id) { return k.allies[id]; });
       if (cAlly.length) return cAlly[Math.floor(rnd() * cAlly.length)];
       return pickExtreme(eligibleIds, function (id) { return lean(state, id); }, false);
     }
+    // liberal & HITLER: nominate the most trusted (low lean). Hitler blends in.
     return pickExtreme(eligibleIds, function (id) { return lean(state, id) + rnd() * 0.3; }, false);
   }
 
@@ -1248,13 +1255,17 @@ select {
     var presId = state.currentPresidentId, chancId = state.nomineeChancellorId;
     var chanc = player(state, chancId);
     var total = state.liberalPolicies + state.fascistPolicies + state.communistPolicies;
-    if (k.team === 'fascist') {
+    if (k.role === 'fascist') {
       if (chanc.role === 'hitler' && state.fascistPolicies >= cfg.hitlerChancellorThreshold) return 'ja';
-      if (k.allies[chancId] || k.allies[presId]) return 'ja';
-      if (state.fascistPolicies >= 4) return rnd() < 0.5 ? 'ja' : 'nein';
-      return rnd() < 0.75 ? 'ja' : 'nein';
+      // block an imminent Liberal win, unless a fascist President can force Fascist instead
+      if (state.liberalPolicies >= cfg.win.liberal - 1 && !k.allies[presId]) return 'nein';
+      if (k.allies[presId] || k.allies[chancId]) return 'ja';
+      return rnd() < 0.82 ? 'ja' : 'nein'; // keep forming governments — the deck favours Fascists
     }
-    var badness = lean(state, chancId) * 1.4 + lean(state, presId) * 0.6;
+    // liberal / Hitler / communist: support trusted-looking governments.
+    // A little noise = imperfect deduction (real Liberals misjudge), which keeps the
+    // Fascists' deck advantage meaningful.
+    var badness = lean(state, chancId) * 1.4 + lean(state, presId) * 0.6 + (rnd() - 0.5) * 0.9;
     if (total === 0) return 'ja';
     if (badness > 1.2) return 'nein';
     if (badness < -0.3) return 'ja';
@@ -1268,18 +1279,18 @@ select {
 
   // index in state.drawnPolicies to DISCARD
   function presidentDiscard(state, botId) {
-    var k = knowledge(state, botId);
-    var order = k.team === 'liberal' ? ['F', 'C', 'L'] : (k.team === 'communist' ? ['F', 'L', 'C'] : ['L', 'C', 'F']);
+    var s = style(player(state, botId).role);
+    var order = s === 'liberal' ? ['F', 'C', 'L'] : (s === 'communist' ? ['F', 'L', 'C'] : ['L', 'C', 'F']);
     return discardByOrder(state.drawnPolicies, order);
   }
 
   // {veto:true} or {index}
   function chancellorAction(state, botId) {
-    var k = knowledge(state, botId);
+    var s = style(player(state, botId).role);
     var tiles = state.chancellorPolicies;
-    var want = k.team === 'liberal' ? 'L' : (k.team === 'communist' ? 'C' : 'F');
+    var want = s === 'liberal' ? 'L' : (s === 'communist' ? 'C' : 'F');
     var idx = tiles.indexOf(want);
-    if (idx === -1 && k.team === 'communist') idx = tiles.indexOf('L');
+    if (idx === -1 && s === 'communist') idx = tiles.indexOf('L');
     if (idx === -1) {
       if (state.vetoUnlocked && !state.vetoRefused) return { veto: true };
       idx = 0; // veto unavailable: must enact
@@ -1288,8 +1299,8 @@ select {
   }
 
   function vetoConsent(state, botId) {
-    var k = knowledge(state, botId);
-    var want = k.team === 'liberal' ? 'L' : (k.team === 'communist' ? 'C' : 'F');
+    var s = style(player(state, botId).role);
+    var want = s === 'liberal' ? 'L' : (s === 'communist' ? 'C' : 'F');
     return state.chancellorPolicies.indexOf(want) === -1;
   }
 
@@ -1300,7 +1311,9 @@ select {
     var pool = nonAlly.length ? nonAlly : targetIds;
     switch (power) {
       case 'execution':
-        return pickExtreme(pool, function (id) { return lean(state, id); }, k.team !== 'fascist');
+        // Fascists kill a trusted Liberal; everyone else (incl. Hitler, to stay hidden)
+        // kills the most-suspicious.
+        return pickExtreme(pool, function (id) { return lean(state, id); }, style(k.role) !== 'fascist');
       case 'investigate':
       case 'bugging':
         return pickExtreme(pool, function (id) { return lean(state, id); }, true);
