@@ -1,5 +1,11 @@
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, View } from 'react-native';
+import {
+  StyleSheet,
+  View,
+  Platform,
+  StatusBar as RNStatusBar,
+  SafeAreaView,
+} from 'react-native';
 import { WebView } from 'react-native-webview';
 import { Asset } from 'expo-asset';
 import * as FileSystem from 'expo-file-system';
@@ -17,8 +23,11 @@ export default function App() {
     })();
   }, []);
 
+  // SafeAreaView insets the notch/home-indicator on iOS; on Android it is a no-op,
+  // so we add the status-bar height as top padding there. This keeps the WebView
+  // content from sliding under the system status bar.
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
       <StatusBar style="light" backgroundColor="#0f0d0b" />
       {html && (
         <WebView
@@ -36,7 +45,7 @@ export default function App() {
           showsVerticalScrollIndicator={false}
         />
       )}
-    </View>
+    </SafeAreaView>
   );
 }
 
@@ -44,6 +53,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#0f0d0b',
+    paddingTop: Platform.OS === 'android' ? RNStatusBar.currentHeight || 0 : 0,
   },
   webview: {
     flex: 1,
