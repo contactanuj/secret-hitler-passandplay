@@ -1,0 +1,10 @@
+node_modules/
+.expo/
+dist/
+web-build/
+.git/
+*.log
+.DS_Store
+assets/icon.placeholder.bak
+credentials/
+credentials.json

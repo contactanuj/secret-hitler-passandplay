@@ -1,0 +1,2631 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="theme-color" content="#0f0d0b" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <title>Secret Hitler</title>
+  <style>
+/* styles.css — Secret Hitler pass-and-play. Dark, warm 1930s palette. */
+:root {
+  --bg: #0f0d0b;
+  --panel: #1b1713;
+  --panel2: #241e18;
+  --line: #3a2f25;
+  --text: #ece4d6;
+  --muted: #9a8f7e;
+  --lib: #2f6fb0;
+  --lib-dim: #1d3a5c;
+  --fas: #c0392b;
+  --comm: #cf8a3c;
+  --gold: #c8a24a;
+  --ok: #4a8f5b;
+  --danger: #c0392b;
+}
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html, body { margin: 0; height: 100%; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font-size: 16px;
+  line-height: 1.4;
+  -webkit-user-select: none; user-select: none;
+}
+#app { max-width: 560px; margin: 0 auto; padding: 16px 16px 40px; min-height: 100%; }
+
+h1, h2, h3 { margin: 0 0 10px; font-weight: 700; letter-spacing: 0.2px; }
+h1 { font-size: 28px; color: var(--gold); }
+h2 { font-size: 21px; }
+h3 { font-size: 16px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; font-weight: 600; }
+p { margin: 0 0 10px; }
+.muted { color: var(--muted); }
+.center { text-align: center; }
+.small { font-size: 13px; }
+.spacer { height: 14px; }
+
+.panel { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 16px; margin-bottom: 14px; }
+.panel.tight { padding: 12px; }
+
+.btn {
+  display: block; width: 100%; padding: 15px 16px; margin: 8px 0;
+  border: 1px solid var(--line); border-radius: 12px;
+  background: var(--panel2); color: var(--text);
+  font-size: 17px; font-weight: 600; text-align: center; cursor: pointer;
+}
+.btn:active { transform: translateY(1px); }
+.btn.primary { background: var(--gold); color: #1a1510; border-color: var(--gold); }
+.btn.lib { background: var(--lib); border-color: var(--lib); color: #fff; }
+.btn.fas { background: var(--fas); border-color: var(--fas); color: #fff; }
+.btn.danger { background: var(--danger); border-color: var(--danger); color: #fff; }
+.btn.ghost { background: transparent; }
+.btn:disabled { opacity: 0.4; cursor: default; }
+.btn.sm { padding: 10px 12px; font-size: 15px; width: auto; display: inline-block; margin: 4px; }
+
+.row { display: flex; gap: 10px; align-items: center; }
+.row.wrap { flex-wrap: wrap; }
+.grow { flex: 1; }
+
+label { display: block; font-size: 13px; color: var(--muted); margin: 10px 0 4px; }
+input[type=text], input[type=number] {
+  width: 100%; padding: 12px; border-radius: 10px;
+  border: 1px solid var(--line); background: #0c0a08; color: var(--text); font-size: 16px;
+}
+select {
+  width: 100%; padding: 11px; border-radius: 10px;
+  border: 1px solid var(--line); background: #0c0a08; color: var(--text); font-size: 15px;
+}
+
+/* number stepper */
+.stepper { display: flex; align-items: center; gap: 0; }
+.stepper button {
+  width: 46px; height: 46px; font-size: 22px; font-weight: 700;
+  background: var(--panel2); color: var(--text); border: 1px solid var(--line); cursor: pointer;
+}
+.stepper button:first-child { border-radius: 10px 0 0 10px; }
+.stepper button:last-child { border-radius: 0 10px 10px 0; }
+.stepper .val { min-width: 56px; text-align: center; font-size: 19px; font-weight: 700;
+  border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); height: 46px; line-height: 46px; background: #0c0a08; }
+
+/* tracks */
+.track { display: flex; gap: 4px; margin: 6px 0; }
+.slot {
+  flex: 1; aspect-ratio: 1 / 1; border-radius: 6px; border: 1px solid var(--line);
+  display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700;
+  text-align: center; color: var(--muted); position: relative; min-height: 34px;
+}
+.slot.lib { background: #14283d; border-color: var(--lib); }
+.slot.lib.filled { background: var(--lib); color: #fff; }
+.slot.fas { background: #2e1512; border-color: var(--fas); }
+.slot.fas.filled { background: var(--fas); color: #fff; }
+.slot .pw { font-size: 9px; line-height: 1.1; padding: 2px; }
+
+.tracker-dots { display: flex; gap: 8px; align-items: center; }
+.dot { width: 16px; height: 16px; border-radius: 50%; border: 2px solid var(--line); }
+.dot.on { background: var(--gold); border-color: var(--gold); }
+
+/* policy tiles */
+.tiles { display: flex; gap: 10px; justify-content: center; margin: 14px 0; }
+.tile {
+  flex: 1; max-width: 130px; aspect-ratio: 2 / 3; border-radius: 12px;
+  display: flex; align-items: center; justify-content: center; flex-direction: column;
+  font-weight: 800; font-size: 15px; letter-spacing: 1px; cursor: pointer; border: 3px solid transparent;
+}
+.tile.L { background: var(--lib); color: #fff; }
+.tile.F { background: var(--fas); color: #fff; }
+.tile.pick:active { border-color: var(--gold); }
+
+/* player list */
+.players { display: flex; flex-direction: column; gap: 6px; }
+.pl { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 10px; background: var(--panel2); border: 1px solid var(--line); }
+.pl.dead { opacity: 0.45; text-decoration: line-through; }
+.pl .badge { font-size: 11px; padding: 2px 7px; border-radius: 20px; border: 1px solid var(--line); color: var(--muted); }
+.pl .badge.pres { background: var(--gold); color: #1a1510; border-color: var(--gold); }
+.pl .badge.chanc { background: #463a1c; color: var(--gold); }
+
+.tag { display: inline-block; font-size: 11px; padding: 2px 8px; border-radius: 20px; border: 1px solid var(--line); color: var(--muted); margin-right: 6px; }
+
+/* role card */
+.rolecard { border-radius: 16px; padding: 26px 18px; text-align: center; margin: 10px 0; border: 2px solid; }
+.rolecard.liberal { background: #14283d; border-color: var(--lib); }
+.rolecard.fascist { background: #2e1512; border-color: var(--fas); }
+.rolecard.hitler  { background: #2a0f0c; border-color: var(--gold); }
+.rolecard .big { font-size: 32px; font-weight: 800; margin: 6px 0; }
+.rolecard.liberal .big { color: #7db4e6; }
+.rolecard.fascist .big { color: #e0796d; }
+.rolecard.hitler .big { color: var(--gold); }
+
+.banner { text-align: center; padding: 22px; border-radius: 16px; margin-bottom: 14px; border: 2px solid; }
+.banner.liberal { background: #14283d; border-color: var(--lib); }
+.banner.fascist { background: #2e1512; border-color: var(--fas); }
+
+.note { border-left: 3px solid var(--gold); padding: 8px 12px; background: var(--panel2); border-radius: 8px; margin: 8px 0; font-size: 14px; }
+.err { border-left: 3px solid var(--danger); padding: 7px 12px; background: #2a1310; border-radius: 8px; margin: 6px 0; font-size: 14px; color: #f0b8b0; }
+.warn { border-left: 3px solid var(--gold); padding: 7px 12px; background: #2a2410; border-radius: 8px; margin: 6px 0; font-size: 14px; color: #e6d39a; }
+
+.topbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+.topbar .title { font-size: 13px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
+.iconbtn { background: var(--panel2); border: 1px solid var(--line); color: var(--text); border-radius: 10px; padding: 8px 12px; font-size: 14px; cursor: pointer; }
+
+.pass-screen { text-align: center; padding: 30px 10px; }
+.pass-screen .who { font-size: 30px; font-weight: 800; color: var(--gold); margin: 10px 0; }
+
+.log-list { font-size: 13px; color: var(--muted); }
+.log-list .li { padding: 5px 0; border-bottom: 1px solid var(--line); }
+
+.collapse-h { display: flex; align-items: center; justify-content: space-between; cursor: pointer; }
+.kv { display: flex; justify-content: space-between; gap: 10px; padding: 6px 0; border-bottom: 1px solid var(--line); }
+.kv:last-child { border-bottom: none; }
+.hidden { display: none; }
+
+/* rule-set chips */
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip { padding: 9px 15px; border-radius: 22px; border: 1px solid var(--line); background: var(--panel2); color: var(--text); font-size: 14px; font-weight: 600; cursor: pointer; }
+.chip.on { background: var(--gold); color: #1a1510; border-color: var(--gold); }
+
+/* home hero */
+.hero .emblem { line-height: 0; margin-bottom: 10px; }
+.hero .emblem svg { display: block; margin: 0 auto; }
+.hero h1 { letter-spacing: 3px; }
+
+/* inline svg icons + typographic tags (replacing emoji) */
+.iconbtn .ic { vertical-align: -3px; }
+.tiptag, .vtag { display: inline-block; font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; border-radius: 4px; padding: 1px 6px; margin-right: 6px; }
+.tiptag { color: #1a1510; background: var(--gold); }
+.warn-tag { color: #1a1510; background: var(--gold); }
+.err-tag { color: #fff; background: var(--danger); }
+.danger-text { color: #e6a07a; font-weight: 700; }
+
+/* atmosphere / motion */
+@keyframes rise { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+@keyframes flipIn { 0% { transform: perspective(600px) rotateX(80deg); opacity: 0; } 100% { transform: perspective(600px) rotateX(0); opacity: 1; } }
+@keyframes pop { 0% { transform: scale(.82); opacity: 0; } 60% { transform: scale(1.04); } 100% { transform: scale(1); opacity: 1; } }
+@keyframes slamIn { 0% { transform: translateY(-14px) scale(1.1); opacity: 0; } 100% { transform: none; opacity: 1; } }
+
+.rolecard.flip { animation: flipIn .45s ease-out; transform-origin: top center; }
+.banner.pop { animation: pop .45s cubic-bezier(.2,.8,.3,1.2); }
+.tile { animation: rise .25s ease-out; }
+.tiles .tile:nth-child(2) { animation-delay: .05s; }
+.tiles .tile:nth-child(3) { animation-delay: .1s; }
+.pass-screen .who { animation: slamIn .3s ease-out; }
+
+/* Communist (XL) faction */
+.slot.comm { background: #2e2310; border-color: var(--comm); }
+.slot.comm.filled { background: var(--comm); color: #1a1206; }
+.rolecard.communist { background: #2a1f0c; border-color: var(--comm); }
+.rolecard.communist .big { color: #e6b074; }
+.banner.communist { background: #2a1f0c; border-color: var(--comm); }
+.badge.party-liberal { background: var(--lib); color: #fff; border-color: var(--lib); }
+.badge.party-fascist { background: var(--fas); color: #fff; border-color: var(--fas); }
+.badge.party-communist { background: var(--comm); color: #1a1206; border-color: var(--comm); }
+.badge.ai { background: #26303a; color: #9fb6c8; border-color: #3a4654; }
+
+  </style>
+</head>
+<body>
+  <div id="app"></div>
+  <script>
+/*
+ * sh-engine.js — Secret Hitler rules engine (pure, transport-agnostic).
+ *
+ * No DOM, no network. Deterministic given a seed, so it can be:
+ *   - unit-tested in Node by simulating full games (tests/engine.test.js),
+ *   - inlined into the pass-and-play app.html (this APK),
+ *   - reused verbatim by the future "Secret Hitler Online" APK.
+ *
+ * State is a plain JSON-serializable object (survives localStorage / network sync).
+ * Randomness uses a seeded PRNG stored on the state (state.rngState) so reshuffles
+ * are reproducible and the whole game can be replayed from (config, seed).
+ *
+ * Rules implemented per the official Secret Hitler rulebook (BY-NC-SA 4.0).
+ */
+(function (root, factory) {
+  var SH = factory();
+  if (typeof module !== 'undefined' && module.exports) module.exports = SH;
+  if (root) root.SH = SH;
+})(typeof window !== 'undefined' ? window : (typeof globalThis !== 'undefined' ? globalThis : this), function () {
+  'use strict';
+
+  // ---------------------------------------------------------------------------
+  // Static data: per-player-count presets and fascist-board power layouts.
+  // ---------------------------------------------------------------------------
+
+  // Roles by player count. Hitler is always exactly 1 (not included in `fascists`).
+  // `hitlerKnowsFascists` is true only for 5-6 players (small games).
+  var PRESETS = {
+    5:  { liberals: 3, fascists: 1, hitlerKnowsFascists: true,  board: '5-6' },
+    6:  { liberals: 4, fascists: 1, hitlerKnowsFascists: true,  board: '5-6' },
+    7:  { liberals: 4, fascists: 2, hitlerKnowsFascists: false, board: '7-8' },
+    8:  { liberals: 5, fascists: 2, hitlerKnowsFascists: false, board: '7-8' },
+    9:  { liberals: 5, fascists: 3, hitlerKnowsFascists: false, board: '9-10' },
+    10: { liberals: 6, fascists: 3, hitlerKnowsFascists: false, board: '9-10' }
+  };
+
+  // Power granted when the Nth Fascist Policy is enacted (index 0 = 1st policy).
+  // null = no power. The final slot is 'win' (6th Fascist Policy ends the game).
+  var BOARDS = {
+    '5-6':  [null, null, 'policy_peek', 'execution', 'execution', 'win'],
+    '7-8':  [null, 'investigate', 'special_election', 'execution', 'execution', 'win'],
+    '9-10': ['investigate', 'investigate', 'special_election', 'execution', 'execution', 'win']
+  };
+
+  var POWERS = ['investigate', 'special_election', 'policy_peek', 'execution'];
+
+  // Communist / Secret Hitler XL expansion (opt-in: config.roles.communists > 0).
+  // A third faction with its own policy track and powers. The standard game is
+  // untouched when communists === 0.
+  var COMMUNIST_POWERS = ['bugging', 'radicalisation', 'confession', 'five_year_plan'];
+  var COMMUNIST_BOARD = ['bugging', 'radicalisation', 'confession', 'five_year_plan', 'win'];
+
+  var POWER_LABELS = {
+    investigate: 'Investigate Loyalty',
+    special_election: 'Call Special Election',
+    policy_peek: 'Policy Peek',
+    execution: 'Execution',
+    bugging: 'Bugging',
+    radicalisation: 'Radicalisation',
+    confession: 'Confession',
+    five_year_plan: 'Five-Year Plan',
+    win: 'Faction wins',
+    null: 'No power'
+  };
+
+  // Named one-tap rule sets. Each only tweaks SAFE, balance-neutral knobs (never
+  // roles/deck/board), so every preset is guaranteed valid for any player count.
+  // `feel` flags are UI-only hints (tips/markers), not engine rules.
+  var RULESETS = {
+    official: { name: 'Official', desc: 'Standard rules, balanced for your player count.', cfg: {}, feel: { tips: false } },
+    beginner: { name: 'Beginner', desc: 'Table voting + extra on-screen guidance for new groups.', cfg: { votingMode: 'table', revealVotes: true }, feel: { tips: true } },
+    fast: { name: 'Fast', desc: 'Chaos after 2 failed elections — quicker, wilder games.', cfg: { electionTrackerMax: 2 }, feel: { tips: false } },
+    tense: { name: 'Tense', desc: 'Secret on-device voting for maximum paranoia.', cfg: { votingMode: 'secret', revealVotes: true }, feel: { tips: false } }
+  };
+
+  // Returns a NEW config = base default for the player count + the ruleset's patch.
+  function applyRuleset(baseConfig, key) {
+    var rs = RULESETS[key] || RULESETS.official;
+    var c = deepClone(baseConfig);
+    var patch = rs.cfg || {};
+    for (var k in patch) if (Object.prototype.hasOwnProperty.call(patch, k)) c[k] = patch[k];
+    return c;
+  }
+
+  // ---------------------------------------------------------------------------
+  // Seeded PRNG (mulberry32) — deterministic + JSON-serializable via state.rngState.
+  // ---------------------------------------------------------------------------
+
+  function nextRand(state) {
+    var t = (state.rngState = (state.rngState + 0x6D2B79F5) >>> 0);
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  }
+
+  function shuffleInPlace(state, arr) {
+    for (var i = arr.length - 1; i > 0; i--) {
+      var j = Math.floor(nextRand(state) * (i + 1));
+      var tmp = arr[i]; arr[i] = arr[j]; arr[j] = tmp;
+    }
+    return arr;
+  }
+
+  // ---------------------------------------------------------------------------
+  // Config construction + validation.
+  // ---------------------------------------------------------------------------
+
+  // Build a faithful default config for a player count (5-10 are official presets;
+  // outside that range we synthesize a reasonable default and let validation warn).
+  function defaultConfig(playerCount, names) {
+    var pc = playerCount || 5;
+    var preset = PRESETS[pc];
+    var roles, hk, boardKey;
+    if (preset) {
+      roles = { liberals: preset.liberals, fascists: preset.fascists };
+      hk = preset.hitlerKnowsFascists;
+      boardKey = preset.board;
+    } else {
+      // Synthesized fallback for non-official counts: ~1/3 fascists (incl. Hitler).
+      var fascTotal = Math.max(1, Math.round(pc / 3));
+      roles = { liberals: pc - fascTotal, fascists: fascTotal - 1 };
+      hk = pc <= 6;
+      boardKey = pc <= 6 ? '5-6' : (pc <= 8 ? '7-8' : '9-10');
+    }
+    return {
+      playerCount: pc,
+      playerNames: (names && names.slice(0, pc)) || defaultNames(pc),
+      roles: { liberals: roles.liberals, fascists: roles.fascists, communists: 0 },
+      hitlerKnowsFascists: hk,
+      communistsKnowEachOther: true,
+      deck: { liberal: 6, fascist: 11, communist: 0 },
+      win: { liberal: 5, fascist: 6, communist: 5 },
+      board: BOARDS[boardKey].slice(),
+      communistBoard: COMMUNIST_BOARD.slice(),
+      electionTrackerMax: 3,
+      hitlerChancellorThreshold: 3,
+      vetoUnlockAt: 5,
+      // How the public election vote is taken:
+      //   'table'  — group votes IRL with hands/cards; app records only Passed/Failed
+      //   'open'   — app records each player's Ja/Nein openly on one shared screen
+      //   'secret' — pass-and-play: each player votes privately, revealed together
+      votingMode: 'table',
+      // Votes are public per the official rules. false = anonymous house-rule.
+      revealVotes: true,
+      // Number of AI-controlled seats (the last N seats become bots).
+      bots: 0
+    };
+  }
+
+  var VOTING_MODES = ['table', 'open', 'secret'];
+
+  function defaultNames(pc) {
+    var out = [];
+    for (var i = 0; i < pc; i++) out.push('Player ' + (i + 1));
+    return out;
+  }
+
+  // Turn a standard config into a 3-faction (Communist) config with sensible
+  // defaults. Communists are taken out of the Liberal pool so the count still sums.
+  // Balance for the expansion is experimental (validation warns).
+  function enableCommunists(config) {
+    var c = deepClone(config);
+    var pc = c.playerCount;
+    var comm = pc >= 8 ? 2 : 1;
+    c.roles.communists = comm;
+    c.roles.liberals = Math.max(1, c.roles.liberals - comm);
+    c.communistsKnowEachOther = true;
+    c.deck.communist = 8;
+    c.win.communist = 5;
+    c.communistBoard = COMMUNIST_BOARD.slice();
+    return c;
+  }
+
+  // 3-way party membership (what Bugging / Confession reveal). Hitler reads Fascist.
+  function partyOf(role) {
+    if (role === 'liberal') return 'Liberal';
+    if (role === 'communist') return 'Communist';
+    return 'Fascist'; // fascist or hitler
+  }
+
+  // Resize/repair a config's board to match the fascist win threshold.
+  // Keeps existing powers where possible, forces the last slot to 'win'.
+  function reconcileBoard(config) {
+    var n = config.win.fascist;
+    var src = config.board || [];
+    var out = [];
+    for (var i = 0; i < n; i++) {
+      out[i] = (i === n - 1) ? 'win' : (i < src.length && src[i] !== 'win' ? src[i] : null);
+    }
+    config.board = out;
+    return config;
+  }
+
+  // Returns { ok, errors:[], warnings:[] }.
+  // errors block starting a game (the config could produce a broken/illegal game).
+  // warnings are off-spec but still playable (respecting "maximum configurable").
+  function validateConfig(config) {
+    var errors = [], warnings = [];
+    var c = config;
+
+    if (!c || typeof c !== 'object') {
+      return { ok: false, errors: ['No configuration provided.'], warnings: [] };
+    }
+
+    var pc = c.playerCount;
+    if (!(pc >= 2)) errors.push('Player count must be at least 2.');
+
+    // Roles must sum (with the single Hitler) to the player count.
+    var lib = c.roles && c.roles.liberals, fas = c.roles && c.roles.fascists;
+    var comm = (c.roles && c.roles.communists) || 0;
+    if (!(lib >= 0) || !(fas >= 0) || !(comm >= 0)) {
+      errors.push('Role counts must be non-negative numbers.');
+    } else {
+      if (fas < 1) errors.push('There must be at least 1 ordinary Fascist (in addition to Hitler).');
+      if (lib < 1) errors.push('There must be at least 1 Liberal.');
+      var sum = lib + fas + comm + 1; // +1 Hitler
+      if (sum !== pc) {
+        errors.push('Roles (' + lib + ' Liberal + ' + fas + ' Fascist + ' + comm + ' Communist + 1 Hitler = ' + sum +
+          ') must equal the player count (' + pc + ').');
+      }
+      if (comm === 0 && lib <= fas + 1) {
+        warnings.push('Liberals (' + lib + ') do not outnumber the Fascist team (' + (fas + 1) +
+          '). Official games always give Liberals a majority.');
+      }
+    }
+
+    // Names: one per player, non-empty, unique.
+    var names = c.playerNames || [];
+    if (names.length !== pc) {
+      errors.push('You have ' + names.length + ' name(s) but ' + pc + ' player(s).');
+    }
+    var seen = {};
+    for (var i = 0; i < names.length; i++) {
+      var nm = (names[i] || '').trim();
+      if (!nm) { errors.push('Every player needs a name (player ' + (i + 1) + ' is blank).'); continue; }
+      var key = nm.toLowerCase();
+      if (seen[key]) warnings.push('Duplicate name "' + nm + '" — players may be hard to tell apart.');
+      seen[key] = true;
+    }
+
+    // Deck.
+    var dl = c.deck && c.deck.liberal, df = c.deck && c.deck.fascist;
+    var dc = (c.deck && c.deck.communist) || 0;
+    if (!(dl >= 0) || !(df >= 0) || !(dc >= 0)) {
+      errors.push('Deck policy counts must be non-negative numbers.');
+    } else {
+      if (dl + df + dc < 3) errors.push('The policy deck needs at least 3 tiles (the President draws 3).');
+      if (df < 1) warnings.push('No Fascist policies in the deck — Fascists can only win by electing Hitler.');
+      if (dl < 1) warnings.push('No Liberal policies in the deck — Liberals can only win by killing Hitler.');
+    }
+
+    // Win thresholds vs deck — these are warnings, not errors: an unreachable
+    // policy track still leaves the Hitler win/lose paths, so the game is playable.
+    var wl = c.win && c.win.liberal, wf = c.win && c.win.fascist;
+    if (!(wl >= 1) || !(wf >= 1)) {
+      errors.push('Win thresholds must be at least 1.');
+    } else {
+      if (dl >= 0 && dl < wl) {
+        warnings.push('Only ' + dl + ' Liberal tiles but ' + wl +
+          ' needed to win — Liberals cannot win on policies (only by killing Hitler).');
+      }
+      if (df >= 0 && df < wf) {
+        warnings.push('Only ' + df + ' Fascist tiles but ' + wf +
+          ' needed to win — Fascists cannot win on policies (only by electing Hitler).');
+      }
+    }
+
+    // Board must have exactly one slot per Fascist policy up to the win threshold.
+    var board = c.board || [];
+    if (wf >= 1 && board.length !== wf) {
+      errors.push('The Fascist board has ' + board.length + ' slot(s) but the Fascist win threshold is ' +
+        wf + '. They must match.');
+    }
+    for (var b = 0; b < board.length; b++) {
+      var p = board[b];
+      var isLast = (b === board.length - 1);
+      if (isLast && p !== 'win') {
+        warnings.push('The final Fascist slot is normally the "Fascists win" slot.');
+      }
+      if (!isLast && p !== null && POWERS.indexOf(p) === -1) {
+        errors.push('Board slot ' + (b + 1) + ' has an unknown power "' + p + '".');
+      }
+    }
+
+    // Misc thresholds.
+    if (!(c.electionTrackerMax >= 1)) errors.push('Election tracker maximum must be at least 1.');
+    if (c.hitlerChancellorThreshold < 0) errors.push('Hitler-Chancellor threshold cannot be negative.');
+    if (wf >= 1 && c.hitlerChancellorThreshold > wf) {
+      warnings.push('Hitler-as-Chancellor only becomes a loss after ' + c.hitlerChancellorThreshold +
+        ' Fascist policies, but the game ends at ' + wf + ' — that win condition can never trigger.');
+    }
+    if (!(c.vetoUnlockAt >= 1)) {
+      errors.push('Veto unlock threshold must be at least 1.');
+    } else if (wf >= 1 && c.vetoUnlockAt > wf) {
+      warnings.push('Veto unlocks at ' + c.vetoUnlockAt + ' Fascist policies, but the game ends at ' +
+        wf + ' — veto will never become available.');
+    }
+
+    // Off-spec player counts: supported, but balance is not guaranteed.
+    if (!PRESETS[pc] && pc >= 2) {
+      warnings.push('Player count ' + pc + ' is outside the official 5-10 range — playable, but balance is untested.');
+    }
+
+    // Communist (Secret Hitler XL) expansion checks.
+    if (comm > 0) {
+      warnings.push('The Communist (Secret Hitler XL) faction is enabled — a fun but experimental variant whose balance is not officially tuned.');
+      var wc = c.win && c.win.communist;
+      if (!(wc >= 1)) {
+        errors.push('Communist win threshold must be at least 1.');
+      } else {
+        if ((c.communistBoard || []).length !== wc) {
+          errors.push('The Communist board has ' + (c.communistBoard || []).length + ' slot(s) but the Communist win threshold is ' + wc + '. They must match.');
+        }
+        if (dc < wc) warnings.push('Only ' + dc + ' Communist tiles but ' + wc + ' needed to win — Communists cannot win on policies.');
+      }
+    }
+
+    // Voting options.
+    if (VOTING_MODES.indexOf(c.votingMode) === -1) {
+      errors.push('Voting mode must be one of: table, open, secret.');
+    }
+    if (c.revealVotes === false) {
+      warnings.push('Anonymous voting is a house rule — official Secret Hitler votes are public, and hiding them removes key deduction information.');
+    }
+
+    return { ok: errors.length === 0, errors: errors, warnings: warnings };
+  }
+
+  // ---------------------------------------------------------------------------
+  // Game lifecycle.
+  // ---------------------------------------------------------------------------
+
+  function uid(i) { return 'p' + i; }
+
+  function newGame(config, seed) {
+    var state = {
+      config: deepClone(config),
+      rngState: (seed >>> 0) || 1,
+      players: [],
+      deck: [],
+      discard: [],
+      enactments: [], // structured history: {round, color, presidentId, chancellorId, chaos}
+      liberalPolicies: 0,
+      fascistPolicies: 0,
+      communistPolicies: 0,
+      electionTracker: 0,
+      round: 1,
+      currentPresidentId: null,
+      rotationAnchorId: null,
+      pendingSpecialPresidentId: null,
+      lastElected: { president: null, chancellor: null },
+      nomineeChancellorId: null,
+      votes: {},
+      lastVotes: null,        // snapshot of last completed vote for public display
+      drawnPolicies: [],      // President's 3
+      chancellorPolicies: [], // Chancellor's 2
+      pendingPower: null,
+      pendingVeto: false,
+      vetoRefused: false, // a refused veto can't be re-proposed this session (prevents a veto loop)
+      vetoUnlocked: false,
+      lastInvestigation: null, // {presidentId, targetId, party} for the reveal screen
+      lastPeek: null,          // [3 policies] for the reveal screen
+      phase: 'reveal',
+      winner: null,            // 'liberal' | 'fascist'
+      winReason: '',
+      log: []
+    };
+
+    // Players in seating order (names order). Roles assigned randomly.
+    var names = config.playerNames;
+    var botCount = config.bots || 0;
+    for (var i = 0; i < names.length; i++) {
+      state.players.push({
+        id: uid(i),
+        name: names[i],
+        role: null,
+        alive: true,
+        isBot: i >= names.length - botCount, // the last N seats are AI
+        investigated: false,
+        clearedNotHitler: false, // proven not-Hitler by surviving the Chancellor check
+        converted: false,        // radicalised into the Communist party
+        partyRevealed: null      // public party (set by Confession)
+      });
+    }
+
+    var roleBag = [];
+    roleBag.push('hitler');
+    for (var l = 0; l < config.roles.liberals; l++) roleBag.push('liberal');
+    for (var f = 0; f < config.roles.fascists; f++) roleBag.push('fascist');
+    for (var cm = 0; cm < (config.roles.communists || 0); cm++) roleBag.push('communist');
+    shuffleInPlace(state, roleBag);
+    for (var r = 0; r < state.players.length; r++) state.players[r].role = roleBag[r];
+
+    // Policy deck.
+    for (var dl = 0; dl < config.deck.liberal; dl++) state.deck.push('L');
+    for (var df = 0; df < config.deck.fascist; df++) state.deck.push('F');
+    for (var dcm = 0; dcm < (config.deck.communist || 0); dcm++) state.deck.push('C');
+    shuffleInPlace(state, state.deck);
+
+    // Random first Presidential Candidate.
+    var firstIdx = Math.floor(nextRand(state) * state.players.length);
+    state.currentPresidentId = state.players[firstIdx].id;
+    state.rotationAnchorId = state.currentPresidentId;
+
+    return state;
+  }
+
+  // Called once the night-phase reveal is done.
+  function beginPlay(state) {
+    state.phase = 'nomination';
+    pushLog(state, 'Game begins. ' + nameOf(state, state.currentPresidentId) + ' is the first Presidential Candidate.');
+    return state;
+  }
+
+  // ---------------------------------------------------------------------------
+  // Helpers.
+  // ---------------------------------------------------------------------------
+
+  function deepClone(o) { return JSON.parse(JSON.stringify(o)); }
+  function getPlayer(state, id) {
+    for (var i = 0; i < state.players.length; i++) if (state.players[i].id === id) return state.players[i];
+    return null;
+  }
+  function nameOf(state, id) { var p = getPlayer(state, id); return p ? p.name : '?'; }
+  function policyWord(c) { return c === 'L' ? 'Liberal' : (c === 'C' ? 'Communist' : 'Fascist'); }
+  function aliveCount(state) {
+    var n = 0; for (var i = 0; i < state.players.length; i++) if (state.players[i].alive) n++; return n;
+  }
+  function alivePlayers(state) { return state.players.filter(function (p) { return p.alive; }); }
+  function pushLog(state, text) { state.log.push({ round: state.round, text: text }); }
+
+  function clockwiseNextAlive(state, fromId) {
+    var idx = 0;
+    for (var i = 0; i < state.players.length; i++) if (state.players[i].id === fromId) { idx = i; break; }
+    var n = state.players.length;
+    for (var k = 1; k <= n; k++) {
+      var cand = state.players[(idx + k) % n];
+      if (cand.alive) return cand.id;
+    }
+    return fromId; // degenerate (everyone else dead)
+  }
+
+  // Term limits: the last *elected* President and Chancellor are ineligible to be
+  // nominated as Chancellor. Exception: with 5 or fewer players alive, only the
+  // last Chancellor is term-limited (the last President may be nominated).
+  function isTermLimited(state, pid) {
+    var le = state.lastElected;
+    if (pid === le.chancellor) return true;
+    if (pid === le.president && aliveCount(state) > 5) return true;
+    return false;
+  }
+
+  function eligibleChancellors(state) {
+    var pres = state.currentPresidentId;
+    return alivePlayers(state).filter(function (p) {
+      return p.id !== pres && !isTermLimited(state, p.id);
+    }).map(function (p) { return p.id; });
+  }
+
+  // The set a President may actually nominate from. Normally the term-eligible
+  // players; but if term limits would leave NO valid candidate (possible after
+  // executions in small/custom games), they are relaxed for this election so the
+  // game can never deadlock — mirroring the spirit of the official 5-player rule.
+  function nominationCandidates(state) {
+    var strict = eligibleChancellors(state);
+    if (strict.length > 0) return { ids: strict, relaxed: false };
+    var relaxed = alivePlayers(state)
+      .filter(function (p) { return p.id !== state.currentPresidentId; })
+      .map(function (p) { return p.id; });
+    return { ids: relaxed, relaxed: true };
+  }
+
+  function powerForFascistCount(state, count) {
+    var board = state.config.board;
+    var p = board[count - 1];
+    if (p && p !== 'win' && POWERS.indexOf(p) !== -1) return p;
+    return null;
+  }
+
+  function powerForCommunistCount(state, count) {
+    var board = state.config.communistBoard || [];
+    var p = board[count - 1];
+    if (p && p !== 'win' && COMMUNIST_POWERS.indexOf(p) !== -1) return p;
+    return null;
+  }
+
+  function reshuffleIfNeeded(state) {
+    if (state.deck.length < 3) {
+      state.deck = shuffleInPlace(state, state.deck.concat(state.discard));
+      state.discard = [];
+    }
+  }
+
+  // ---------------------------------------------------------------------------
+  // Election phase.
+  // ---------------------------------------------------------------------------
+
+  function nominate(state, chancellorId) {
+    if (state.phase !== 'nomination') throw new Error('Not in nomination phase.');
+    if (nominationCandidates(state).ids.indexOf(chancellorId) === -1) throw new Error('That player is not an eligible Chancellor.');
+    state.nomineeChancellorId = chancellorId;
+    state.votes = {};
+    state.phase = 'voting';
+    pushLog(state, nameOf(state, state.currentPresidentId) + ' nominated ' + nameOf(state, chancellorId) + ' as Chancellor.');
+    return state;
+  }
+
+  function castVote(state, playerId, vote) {
+    if (state.phase !== 'voting') throw new Error('Not in voting phase.');
+    var p = getPlayer(state, playerId);
+    if (!p || !p.alive) throw new Error('Only living players vote.');
+    if (vote !== 'ja' && vote !== 'nein') throw new Error('Vote must be ja or nein.');
+    state.votes[playerId] = vote;
+    return state;
+  }
+
+  function allVotesIn(state) {
+    var alive = alivePlayers(state);
+    for (var i = 0; i < alive.length; i++) if (!state.votes[alive[i].id]) return false;
+    return true;
+  }
+
+  // Core election transition, shared by all voting modes.
+  // `summary` is an optional human-readable tally string for the log.
+  function applyElectionOutcome(state, passed, summary) {
+    var suffix = summary ? ' ' + summary : '';
+    if (passed) {
+      state.lastElected = { president: state.currentPresidentId, chancellor: state.nomineeChancellorId };
+      pushLog(state, 'Government ELECTED: President ' + nameOf(state, state.currentPresidentId) +
+        ' / Chancellor ' + nameOf(state, state.nomineeChancellorId) + suffix + '.');
+      if (state.fascistPolicies >= state.config.hitlerChancellorThreshold) {
+        var chanc = getPlayer(state, state.nomineeChancellorId);
+        if (chanc.role === 'hitler') {
+          return endGame(state, 'fascist', 'Hitler was elected Chancellor after ' +
+            state.fascistPolicies + ' Fascist Policies.');
+        }
+        // Survived the check with the threshold met: provably not Hitler.
+        chanc.clearedNotHitler = true;
+      }
+      enterLegislative(state);
+    } else {
+      pushLog(state, 'Government REJECTED' + suffix + '. Election Tracker ' +
+        (state.electionTracker + 1) + '/' + state.config.electionTrackerMax + '.');
+      advanceElectionTracker(state);
+    }
+    return state;
+  }
+
+  // On-device voting (secret pass-and-play, or open tally): tally state.votes.
+  function resolveVotes(state) {
+    if (state.phase !== 'voting') throw new Error('Not in voting phase.');
+    var alive = alivePlayers(state);
+    var ja = 0, nein = 0;
+    for (var i = 0; i < alive.length; i++) {
+      if (state.votes[alive[i].id] === 'ja') ja++; else nein++;
+    }
+    state.lastVotes = {
+      president: state.currentPresidentId,
+      chancellor: state.nomineeChancellorId,
+      ja: ja, nein: nein,
+      ballots: deepClone(state.votes),
+      manual: false
+    };
+    var passed = ja * 2 > alive.length; // strict majority; ties fail
+    return applyElectionOutcome(state, passed, '(' + ja + ' Ja / ' + nein + ' Nein)');
+  }
+
+  // Table voting: the group votes IRL; the app is told only the outcome.
+  // An optional jaCount (votes are public anyway) enriches the log and overrides
+  // `passed` for safety if provided.
+  function resolveElectionManual(state, passed, jaCount) {
+    if (state.phase !== 'voting') throw new Error('Not in voting phase.');
+    var alive = aliveCount(state);
+    var summary = '';
+    if (jaCount != null) {
+      passed = jaCount * 2 > alive; // strict majority; ties fail
+      summary = '(' + jaCount + ' Ja / ' + (alive - jaCount) + ' Nein)';
+    } else {
+      summary = '(table vote)';
+    }
+    state.lastVotes = {
+      president: state.currentPresidentId,
+      chancellor: state.nomineeChancellorId,
+      ja: (jaCount != null ? jaCount : null),
+      nein: (jaCount != null ? alive - jaCount : null),
+      ballots: null,
+      manual: true
+    };
+    return applyElectionOutcome(state, !!passed, summary);
+  }
+
+  // A failed/inactive government advances the tracker; the 3rd triggers chaos.
+  function advanceElectionTracker(state) {
+    state.electionTracker++;
+    if (state.electionTracker >= state.config.electionTrackerMax) {
+      chaos(state);
+    } else {
+      startNextRound(state);
+    }
+  }
+
+  function chaos(state) {
+    reshuffleIfNeeded(state);
+    var top = state.deck.shift();
+    state.electionTracker = 0;
+    state.lastElected = { president: null, chancellor: null }; // term limits forgotten
+    applyPolicy(state, top, true);
+    state.enactments.push({ round: state.round, color: top, presidentId: null, chancellorId: null, chaos: true });
+    pushLog(state, 'Three failed elections — the country falls into chaos. Top policy enacted: ' +
+      policyWord(top) + '. Term limits forgotten.');
+    if (checkPolicyWin(state)) return;
+    reshuffleIfNeeded(state);
+    startNextRound(state);
+  }
+
+  // ---------------------------------------------------------------------------
+  // Legislative session.
+  // ---------------------------------------------------------------------------
+
+  function enterLegislative(state) {
+    reshuffleIfNeeded(state);
+    state.drawnPolicies = [state.deck.shift(), state.deck.shift(), state.deck.shift()];
+    state.vetoRefused = false;
+    state.phase = 'legislative_president';
+  }
+
+  function presidentDiscard(state, index) {
+    if (state.phase !== 'legislative_president') throw new Error('Not in President legislative phase.');
+    if (index < 0 || index >= state.drawnPolicies.length) throw new Error('Invalid discard index.');
+    var discarded = state.drawnPolicies.splice(index, 1)[0];
+    state.discard.push(discarded);
+    state.chancellorPolicies = state.drawnPolicies;
+    state.drawnPolicies = [];
+    state.phase = 'legislative_chancellor';
+    return state;
+  }
+
+  function chancellorEnact(state, index) {
+    if (state.phase !== 'legislative_chancellor') throw new Error('Not in Chancellor legislative phase.');
+    if (index < 0 || index >= state.chancellorPolicies.length) throw new Error('Invalid enact index.');
+    var enacted = state.chancellorPolicies.splice(index, 1)[0];
+    state.discard.push(state.chancellorPolicies[0]); // the other one
+    state.chancellorPolicies = [];
+    applyPolicy(state, enacted, false);
+    state.enactments.push({ round: state.round, color: enacted, presidentId: state.currentPresidentId, chancellorId: state.nomineeChancellorId, chaos: false });
+    pushLog(state, 'A ' + policyWord(enacted) + ' Policy was enacted (' +
+      state.liberalPolicies + ' Liberal / ' + state.fascistPolicies + ' Fascist' +
+      ((state.config.roles.communists || 0) > 0 ? ' / ' + state.communistPolicies + ' Communist' : '') + ').');
+    postEnact(state, enacted);
+    return state;
+  }
+
+  function chancellorRequestVeto(state) {
+    if (state.phase !== 'legislative_chancellor') throw new Error('Not in Chancellor legislative phase.');
+    if (!state.vetoUnlocked) throw new Error('Veto is not unlocked yet.');
+    if (state.vetoRefused) throw new Error('Veto was already refused this session — the Chancellor must enact.');
+    state.pendingVeto = true;
+    state.phase = 'veto_consent';
+    pushLog(state, nameOf(state, state.nomineeChancellorId) + ' (Chancellor) proposes to VETO this agenda.');
+    return state;
+  }
+
+  function presidentConsentVeto(state, consent) {
+    if (state.phase !== 'veto_consent') throw new Error('Not awaiting veto consent.');
+    state.pendingVeto = false;
+    if (consent) {
+      // Both remaining policies discarded; inactive government advances tracker.
+      for (var i = 0; i < state.chancellorPolicies.length; i++) state.discard.push(state.chancellorPolicies[i]);
+      state.chancellorPolicies = [];
+      pushLog(state, 'President AGREED to the veto. Agenda discarded (inactive government).');
+      advanceElectionTracker(state);
+    } else {
+      state.vetoRefused = true; // chancellor may not veto again this session
+      state.phase = 'legislative_chancellor';
+      pushLog(state, 'President REFUSED the veto. The Chancellor must enact a Policy.');
+    }
+    return state;
+  }
+
+  function applyPolicy(state, color, isChaos) {
+    if (color === 'L') state.liberalPolicies++;
+    else if (color === 'C') state.communistPolicies++;
+    else state.fascistPolicies++;
+    state.electionTracker = 0; // any face-up policy resets the tracker
+    if (state.fascistPolicies >= state.config.vetoUnlockAt) state.vetoUnlocked = true;
+  }
+
+  function postEnact(state, enactedColor) {
+    reshuffleIfNeeded(state);
+    if (checkPolicyWin(state)) return;
+    if (enactedColor === 'F') {
+      var power = powerForFascistCount(state, state.fascistPolicies);
+      if (power) {
+        state.pendingPower = power;
+        state.phase = 'power';
+        pushLog(state, 'The Fascist Policy grants the President a power: ' + POWER_LABELS[power] + '.');
+        return;
+      }
+    } else if (enactedColor === 'C') {
+      var cpow = powerForCommunistCount(state, state.communistPolicies);
+      if (cpow) {
+        state.pendingPower = cpow;
+        state.phase = 'power';
+        pushLog(state, 'The Communist Policy grants a power: ' + POWER_LABELS[cpow] + '.');
+        return;
+      }
+    }
+    startNextRound(state);
+  }
+
+  // ---------------------------------------------------------------------------
+  // Executive powers.
+  // ---------------------------------------------------------------------------
+
+  function powerInvestigate(state, targetId) {
+    requirePower(state, 'investigate');
+    var t = getPlayer(state, targetId);
+    if (!t || !t.alive) throw new Error('Cannot investigate that player.');
+    if (t.id === state.currentPresidentId) throw new Error('The President cannot investigate themselves.');
+    if (t.investigated) throw new Error('That player has already been investigated.');
+    t.investigated = true;
+    var party = (t.role === 'liberal') ? 'Liberal' : 'Fascist';
+    state.lastInvestigation = { presidentId: state.currentPresidentId, targetId: targetId, party: party };
+    pushLog(state, nameOf(state, state.currentPresidentId) + ' investigated ' + t.name + ' (result kept secret).');
+    finishPower(state);
+    return party;
+  }
+
+  function powerSpecialElection(state, targetId) {
+    requirePower(state, 'special_election');
+    var t = getPlayer(state, targetId);
+    if (!t || !t.alive) throw new Error('Cannot pick that player.');
+    if (t.id === state.currentPresidentId) throw new Error('Pick another player.');
+    state.rotationAnchorId = state.currentPresidentId; // rotation resumes left of the enactor
+    state.pendingSpecialPresidentId = targetId;
+    pushLog(state, nameOf(state, state.currentPresidentId) + ' called a Special Election: ' + t.name +
+      ' will be the next Presidential Candidate.');
+    finishPower(state);
+    return state;
+  }
+
+  function powerPolicyPeek(state) {
+    requirePower(state, 'policy_peek');
+    reshuffleIfNeeded(state);
+    state.lastPeek = state.deck.slice(0, 3);
+    pushLog(state, nameOf(state, state.currentPresidentId) + ' used Policy Peek (saw the top 3 policies).');
+    finishPower(state);
+    return state.lastPeek.slice();
+  }
+
+  function powerExecution(state, targetId) {
+    requirePower(state, 'execution');
+    var t = getPlayer(state, targetId);
+    if (!t || !t.alive) throw new Error('Cannot execute that player.');
+    if (t.id === state.currentPresidentId) throw new Error('The President cannot execute themselves.');
+    t.alive = false;
+    pushLog(state, nameOf(state, state.currentPresidentId) + ' executed ' + t.name + '.');
+    if (t.role === 'hitler') {
+      return endGame(state, 'liberal', 'Hitler was assassinated.');
+    }
+    finishPower(state);
+    return state;
+  }
+
+  // ---- Communist (XL) powers ----
+
+  // Bugging: like Investigate, but reveals the 3-way party (Hitler reads Fascist).
+  function powerBugging(state, targetId) {
+    requirePower(state, 'bugging');
+    var t = getPlayer(state, targetId);
+    if (!t || !t.alive) throw new Error('Cannot bug that player.');
+    if (t.id === state.currentPresidentId) throw new Error('Pick another player.');
+    var party = partyOf(t.role);
+    state.lastInvestigation = { presidentId: state.currentPresidentId, targetId: targetId, party: party, bug: true };
+    pushLog(state, nameOf(state, state.currentPresidentId) + ' bugged ' + t.name + ' (party seen in secret).');
+    finishPower(state);
+    return party;
+  }
+
+  // Confession: the President's party is revealed publicly to the whole table.
+  function powerConfession(state) {
+    requirePower(state, 'confession');
+    var pres = getPlayer(state, state.currentPresidentId);
+    pres.partyRevealed = partyOf(pres.role);
+    pushLog(state, 'CONFESSION: ' + pres.name + ' (President) is publicly revealed as ' + pres.partyRevealed + '.');
+    finishPower(state);
+    return pres.partyRevealed;
+  }
+
+  // Five-Year Plan: shuffle 2 Communist + 1 Liberal policy into the deck.
+  function powerFiveYearPlan(state) {
+    requirePower(state, 'five_year_plan');
+    state.deck.push('C', 'C', 'L');
+    shuffleInPlace(state, state.deck);
+    pushLog(state, 'FIVE-YEAR PLAN: 2 Communist and 1 Liberal policy were shuffled into the deck.');
+    finishPower(state);
+    return state;
+  }
+
+  // Radicalisation: convert a player to the Communist party. Hitler is immune
+  // (the attempt silently fails; the outcome is revealed privately to the target).
+  function powerRadicalise(state, targetId) {
+    requirePower(state, 'radicalisation');
+    var t = getPlayer(state, targetId);
+    if (!t || !t.alive) throw new Error('Cannot radicalise that player.');
+    if (t.id === state.currentPresidentId) throw new Error('Pick another player.');
+    var success = (t.role !== 'hitler');
+    if (success) { t.role = 'communist'; t.converted = true; }
+    state.lastConversion = { targetId: targetId, success: success };
+    pushLog(state, nameOf(state, state.currentPresidentId) + ' attempted to radicalise ' + t.name + ' (outcome secret).');
+    finishPower(state);
+    return success;
+  }
+
+  function requirePower(state, name) {
+    if (state.phase !== 'power' || state.pendingPower !== name) {
+      throw new Error('Power "' + name + '" is not currently available.');
+    }
+  }
+
+  function finishPower(state) {
+    state.pendingPower = null;
+    startNextRound(state);
+  }
+
+  // ---------------------------------------------------------------------------
+  // Round transitions + win checks.
+  // ---------------------------------------------------------------------------
+
+  function startNextRound(state) {
+    if (state.winner) return;
+    state.round++;
+    if (state.pendingSpecialPresidentId) {
+      state.currentPresidentId = state.pendingSpecialPresidentId;
+      state.pendingSpecialPresidentId = null;
+      // rotationAnchorId already set to the enactor; do not change it.
+    } else {
+      state.currentPresidentId = clockwiseNextAlive(state, state.rotationAnchorId);
+      state.rotationAnchorId = state.currentPresidentId;
+    }
+    state.nomineeChancellorId = null;
+    state.votes = {};
+    state.drawnPolicies = [];
+    state.chancellorPolicies = [];
+    state.pendingPower = null;
+    state.pendingVeto = false;
+    state.vetoRefused = false;
+    state.phase = 'nomination';
+  }
+
+  function checkPolicyWin(state) {
+    if (state.liberalPolicies >= state.config.win.liberal) {
+      endGame(state, 'liberal', state.config.win.liberal + ' Liberal Policies were enacted.');
+      return true;
+    }
+    if (state.fascistPolicies >= state.config.win.fascist) {
+      endGame(state, 'fascist', state.config.win.fascist + ' Fascist Policies were enacted.');
+      return true;
+    }
+    if ((state.config.roles.communists || 0) > 0 && state.communistPolicies >= state.config.win.communist) {
+      endGame(state, 'communist', state.config.win.communist + ' Communist Policies were enacted.');
+      return true;
+    }
+    return false;
+  }
+
+  function endGame(state, winner, reason) {
+    state.winner = winner;
+    state.winReason = reason;
+    state.phase = 'game_over';
+    pushLog(state, (winner === 'liberal' ? 'LIBERALS' : 'FASCISTS') + ' WIN — ' + reason);
+    return state;
+  }
+
+  // Night-phase info a given player should see during the secret reveal.
+  function revealInfo(state, playerId) {
+    var me = getPlayer(state, playerId);
+    var info = { role: me.role, knows: [] };
+    var i, p;
+    if (me.role === 'fascist') {
+      for (i = 0; i < state.players.length; i++) {
+        p = state.players[i];
+        if (p.id === me.id) continue;
+        if (p.role === 'fascist') info.knows.push({ name: p.name, label: 'Fascist' });
+        if (p.role === 'hitler') info.knows.push({ name: p.name, label: 'Hitler' });
+      }
+    } else if (me.role === 'hitler' && state.config.hitlerKnowsFascists) {
+      for (i = 0; i < state.players.length; i++) {
+        p = state.players[i];
+        if (p.role === 'fascist') info.knows.push({ name: p.name, label: 'Fascist' });
+      }
+    } else if (me.role === 'communist' && state.config.communistsKnowEachOther) {
+      for (i = 0; i < state.players.length; i++) {
+        p = state.players[i];
+        if (p.id === me.id) continue;
+        if (p.role === 'communist') info.knows.push({ name: p.name, label: 'Communist' });
+      }
+    }
+    return info;
+  }
+
+  return {
+    PRESETS: PRESETS,
+    BOARDS: BOARDS,
+    POWERS: POWERS,
+    POWER_LABELS: POWER_LABELS,
+    RULESETS: RULESETS,
+    applyRuleset: applyRuleset,
+    COMMUNIST_BOARD: COMMUNIST_BOARD,
+    COMMUNIST_POWERS: COMMUNIST_POWERS,
+    defaultConfig: defaultConfig,
+    defaultNames: defaultNames,
+    enableCommunists: enableCommunists,
+    partyOf: partyOf,
+    reconcileBoard: reconcileBoard,
+    validateConfig: validateConfig,
+    newGame: newGame,
+    beginPlay: beginPlay,
+    // queries
+    getPlayer: getPlayer,
+    nameOf: nameOf,
+    aliveCount: aliveCount,
+    alivePlayers: alivePlayers,
+    eligibleChancellors: eligibleChancellors,
+    nominationCandidates: nominationCandidates,
+    isTermLimited: isTermLimited,
+    powerForFascistCount: powerForFascistCount,
+    allVotesIn: allVotesIn,
+    revealInfo: revealInfo,
+    // actions
+    nominate: nominate,
+    castVote: castVote,
+    resolveVotes: resolveVotes,
+    resolveElectionManual: resolveElectionManual,
+    presidentDiscard: presidentDiscard,
+    chancellorEnact: chancellorEnact,
+    chancellorRequestVeto: chancellorRequestVeto,
+    presidentConsentVeto: presidentConsentVeto,
+    powerInvestigate: powerInvestigate,
+    powerSpecialElection: powerSpecialElection,
+    powerPolicyPeek: powerPolicyPeek,
+    powerExecution: powerExecution,
+    powerForCommunistCount: powerForCommunistCount,
+    powerBugging: powerBugging,
+    powerConfession: powerConfession,
+    powerFiveYearPlan: powerFiveYearPlan,
+    powerRadicalise: powerRadicalise
+  };
+});
+
+  </script>
+  <script>
+/*
+ * sh-bot.js — bot "brain" for Secret Hitler. Pure, no DOM. Decides legal moves
+ * for AI-controlled seats based on the bot's legitimate knowledge (its role +
+ * faction allies it would know at night) and a simple public-suspicion heuristic
+ * computed from the enactment history. Faction-aware and works in 3-faction (XL)
+ * games too. Decisions are deliberately "decent, not genius" (like the reference
+ * online game's bots) — the goal is fun seat-filling, not perfect play.
+ *
+ * The caller (UI) supplies candidate/target lists from the engine so the bot never
+ * has to re-implement eligibility rules — it only ranks among legal options.
+ */
+(function (root, factory) {
+  var SHBot = factory();
+  if (typeof module !== 'undefined' && module.exports) module.exports = SHBot;
+  if (root) root.SHBot = SHBot;
+})(typeof window !== 'undefined' ? window : (typeof globalThis !== 'undefined' ? globalThis : this), function () {
+  'use strict';
+
+  function player(state, id) {
+    for (var i = 0; i < state.players.length; i++) if (state.players[i].id === id) return state.players[i];
+    return null;
+  }
+  function team(role) { return role === 'liberal' ? 'liberal' : (role === 'communist' ? 'communist' : 'fascist'); }
+  function rnd() { return Math.random(); }
+
+  // What this bot legitimately knows from the night phase.
+  function knowledge(state, botId) {
+    var me = player(state, botId), cfg = state.config, allies = {}, i, p;
+    if (me.role === 'fascist') {
+      for (i = 0; i < state.players.length; i++) { p = state.players[i]; if (p.id !== me.id && (p.role === 'fascist' || p.role === 'hitler')) allies[p.id] = true; }
+    } else if (me.role === 'hitler' && cfg.hitlerKnowsFascists) {
+      for (i = 0; i < state.players.length; i++) { p = state.players[i]; if (p.role === 'fascist') allies[p.id] = true; }
+    } else if (me.role === 'communist' && cfg.communistsKnowEachOther) {
+      for (i = 0; i < state.players.length; i++) { p = state.players[i]; if (p.id !== me.id && p.role === 'communist') allies[p.id] = true; }
+    }
+    return { me: me, role: me.role, team: team(me.role), allies: allies };
+  }
+
+  // Public "looks fascist" score from enactment history (higher = more suspicious).
+  function lean(state, id) {
+    var s = 0;
+    (state.enactments || []).forEach(function (e) {
+      if (e.chaos) return;
+      if (e.presidentId === id) s += (e.color === 'F' ? 1.0 : (e.color === 'L' ? -0.5 : 0.2));
+      if (e.chancellorId === id) s += (e.color === 'F' ? 1.6 : (e.color === 'L' ? -1.1 : 0.3));
+    });
+    var p = player(state, id);
+    if (p && p.partyRevealed === 'Fascist') s += 3;
+    if (p && p.partyRevealed === 'Liberal') s -= 3;
+    return s;
+  }
+
+  function pickExtreme(ids, scoreFn, wantMax) {
+    var best = null, bestScore = null;
+    for (var i = 0; i < ids.length; i++) {
+      var sc = scoreFn(ids[i]);
+      if (best === null || (wantMax ? sc > bestScore : sc < bestScore)) { best = ids[i]; bestScore = sc; }
+    }
+    return best;
+  }
+
+  function nominate(state, botId, eligibleIds) {
+    if (!eligibleIds || !eligibleIds.length) return null;
+    var k = knowledge(state, botId), cfg = state.config;
+    if (k.team === 'fascist') {
+      if (state.fascistPolicies >= cfg.hitlerChancellorThreshold) {
+        for (var i = 0; i < eligibleIds.length; i++) if (player(state, eligibleIds[i]).role === 'hitler') return eligibleIds[i];
+      }
+      var allyIds = eligibleIds.filter(function (id) { return k.allies[id]; });
+      if (allyIds.length) return allyIds[Math.floor(rnd() * allyIds.length)];
+      return pickExtreme(eligibleIds, function (id) { return lean(state, id); }, false);
+    }
+    if (k.team === 'communist') {
+      var cAlly = eligibleIds.filter(function (id) { return k.allies[id]; });
+      if (cAlly.length) return cAlly[Math.floor(rnd() * cAlly.length)];
+      return pickExtreme(eligibleIds, function (id) { return lean(state, id); }, false);
+    }
+    return pickExtreme(eligibleIds, function (id) { return lean(state, id) + rnd() * 0.3; }, false);
+  }
+
+  function vote(state, botId) {
+    var k = knowledge(state, botId), cfg = state.config;
+    var presId = state.currentPresidentId, chancId = state.nomineeChancellorId;
+    var chanc = player(state, chancId);
+    var total = state.liberalPolicies + state.fascistPolicies + state.communistPolicies;
+    if (k.team === 'fascist') {
+      if (chanc.role === 'hitler' && state.fascistPolicies >= cfg.hitlerChancellorThreshold) return 'ja';
+      if (k.allies[chancId] || k.allies[presId]) return 'ja';
+      if (state.fascistPolicies >= 4) return rnd() < 0.5 ? 'ja' : 'nein';
+      return rnd() < 0.75 ? 'ja' : 'nein';
+    }
+    var badness = lean(state, chancId) * 1.4 + lean(state, presId) * 0.6;
+    if (total === 0) return 'ja';
+    if (badness > 1.2) return 'nein';
+    if (badness < -0.3) return 'ja';
+    return rnd() < 0.7 ? 'ja' : 'nein';
+  }
+
+  function discardByOrder(tiles, order) {
+    for (var o = 0; o < order.length; o++) for (var i = 0; i < tiles.length; i++) if (tiles[i] === order[o]) return i;
+    return 0;
+  }
+
+  // index in state.drawnPolicies to DISCARD
+  function presidentDiscard(state, botId) {
+    var k = knowledge(state, botId);
+    var order = k.team === 'liberal' ? ['F', 'C', 'L'] : (k.team === 'communist' ? ['F', 'L', 'C'] : ['L', 'C', 'F']);
+    return discardByOrder(state.drawnPolicies, order);
+  }
+
+  // {veto:true} or {index}
+  function chancellorAction(state, botId) {
+    var k = knowledge(state, botId);
+    var tiles = state.chancellorPolicies;
+    var want = k.team === 'liberal' ? 'L' : (k.team === 'communist' ? 'C' : 'F');
+    var idx = tiles.indexOf(want);
+    if (idx === -1 && k.team === 'communist') idx = tiles.indexOf('L');
+    if (idx === -1) {
+      if (state.vetoUnlocked && !state.vetoRefused) return { veto: true };
+      idx = 0; // veto unavailable: must enact
+    }
+    return { index: idx };
+  }
+
+  function vetoConsent(state, botId) {
+    var k = knowledge(state, botId);
+    var want = k.team === 'liberal' ? 'L' : (k.team === 'communist' ? 'C' : 'F');
+    return state.chancellorPolicies.indexOf(want) === -1;
+  }
+
+  function powerTarget(state, botId, power, targetIds) {
+    if (!targetIds || !targetIds.length) return null;
+    var k = knowledge(state, botId);
+    var nonAlly = targetIds.filter(function (id) { return !k.allies[id]; });
+    var pool = nonAlly.length ? nonAlly : targetIds;
+    switch (power) {
+      case 'execution':
+        return pickExtreme(pool, function (id) { return lean(state, id); }, k.team !== 'fascist');
+      case 'investigate':
+      case 'bugging':
+        return pickExtreme(pool, function (id) { return lean(state, id); }, true);
+      case 'special_election':
+        if (k.team !== 'liberal') { var a = targetIds.filter(function (id) { return k.allies[id]; }); if (a.length) return a[0]; }
+        return pickExtreme(targetIds, function (id) { return lean(state, id); }, false);
+      case 'radicalisation':
+        return pickExtreme(pool, function (id) { return lean(state, id); }, k.team !== 'communist');
+      default:
+        return pool[0];
+    }
+  }
+
+  return {
+    nominate: nominate,
+    vote: vote,
+    presidentDiscard: presidentDiscard,
+    chancellorAction: chancellorAction,
+    vetoConsent: vetoConsent,
+    powerTarget: powerTarget,
+    _lean: lean
+  };
+});
+
+  </script>
+  <script>
+/*
+ * sound.js — tiny synthesized SFX (WebAudio, no asset files). Optional/toggleable.
+ * Safely no-ops where WebAudio is unavailable (e.g. the headless Node smoke test).
+ * Exposes window.SHSound.
+ */
+(function (root) {
+  'use strict';
+  var ctx = null, enabled = true;
+
+  function ac() {
+    if (ctx) return ctx;
+    var AC = root.AudioContext || root.webkitAudioContext;
+    if (!AC) return null;
+    try { ctx = new AC(); } catch (e) { ctx = null; }
+    return ctx;
+  }
+
+  function tone(freq, dur, type, gain, delay) {
+    var c = ac(); if (!c) return;
+    try {
+      var t0 = c.currentTime + (delay || 0);
+      var o = c.createOscillator(), g = c.createGain();
+      o.type = type || 'sine';
+      o.frequency.setValueAtTime(freq, t0);
+      g.gain.setValueAtTime(0.0001, t0);
+      g.gain.exponentialRampToValueAtTime(gain || 0.12, t0 + 0.012);
+      g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+      o.connect(g); g.connect(c.destination);
+      o.start(t0); o.stop(t0 + dur + 0.03);
+    } catch (e) {}
+  }
+  function chord(freqs, dur, type, gain) {
+    for (var i = 0; i < freqs.length; i++) tone(freqs[i], dur, type, gain, 0);
+  }
+
+  var SFX = {
+    setEnabled: function (v) { enabled = !!v; },
+    isEnabled: function () { return enabled; },
+    // resume() must be called from a user gesture on some browsers
+    resume: function () { var c = ac(); if (c && c.resume) try { c.resume(); } catch (e) {} },
+    play: function (name) {
+      if (!enabled) return;
+      switch (name) {
+        case 'tap': tone(420, 0.05, 'square', 0.04); break;
+        case 'pass': tone(300, 0.12, 'sine', 0.07); break;
+        case 'reveal': tone(220, 0.16, 'sawtooth', 0.07); tone(330, 0.18, 'sine', 0.05, 0.03); break;
+        case 'ja': tone(520, 0.1, 'triangle', 0.09); break;
+        case 'nein': tone(180, 0.14, 'sawtooth', 0.09); break;
+        case 'elected': chord([392, 523], 0.18, 'triangle', 0.08); break;
+        case 'rejected': tone(200, 0.2, 'sawtooth', 0.08); break;
+        case 'policyLib': chord([523, 659], 0.22, 'sine', 0.09); break;
+        case 'policyFas': chord([196, 233], 0.28, 'sawtooth', 0.09); break;
+        case 'power': tone(660, 0.1, 'square', 0.07); tone(880, 0.12, 'square', 0.05, 0.06); break;
+        case 'execute': tone(140, 0.35, 'sawtooth', 0.11); break;
+        case 'winLib': chord([392, 523, 659], 0.5, 'triangle', 0.11); break;
+        case 'winFas': chord([147, 185, 220], 0.6, 'sawtooth', 0.11); break;
+        default: break;
+      }
+    }
+  };
+
+  try { root.SHSound = SFX; } catch (e) {}
+  if (typeof module !== 'undefined' && module.exports) module.exports = SFX;
+})(typeof window !== 'undefined' ? window : (typeof globalThis !== 'undefined' ? globalThis : this));
+
+  </script>
+  <script>
+/*
+ * ui.js — pass-and-play UI for Secret Hitler. Browser-only (uses the DOM).
+ * Depends on the SH engine (window.SH), inlined before this script by build.js.
+ *
+ * One device is passed around the table. All hidden information (roles, votes,
+ * drawn policies, investigation results) is shown only behind a "pass the device
+ * to X" gate so the holder sees it privately.
+ */
+(function () {
+  'use strict';
+  var SH = window.SH;
+  var Bot = window.SHBot;
+  var app = document.getElementById('app');
+  var KEY = 'sh_state_v1';
+  var BOT_DELAY = 650; // ms pause before a bot acts, so humans can follow
+
+  var G = null;        // engine game state (or null)
+  var draft = null;    // setup config being edited
+  var view = 'home';   // 'home' | 'setup' | 'rules' | 'game' | 'log'
+  var ui = {};         // transient per-screen UI state (not persisted meaningfully)
+
+  // Inline SVG icons (render identically across WebViews, unlike emoji).
+  var GEAR_SVG = '<svg class="ic" viewBox="0 0 24 24" width="17" height="17" fill="currentColor"><path d="M19.4 13c.04-.33.06-.66.06-1s-.02-.67-.06-1l2.11-1.65a.5.5 0 0 0 .12-.64l-2-3.46a.5.5 0 0 0-.6-.22l-2.49 1a7.3 7.3 0 0 0-1.73-1l-.38-2.65A.49.49 0 0 0 14 2h-4a.49.49 0 0 0-.5.42l-.38 2.65c-.63.26-1.21.6-1.73 1l-2.49-1a.5.5 0 0 0-.6.22l-2 3.46a.5.5 0 0 0 .12.64L4.6 11c-.04.33-.06.66-.06 1s.02.67.06 1l-2.11 1.65a.5.5 0 0 0-.12.64l2 3.46c.14.24.42.32.6.22l2.49-1c.52.4 1.1.74 1.73 1l.38 2.65c.04.24.25.42.5.42h4c.25 0 .46-.18.5-.42l.38-2.65c.63-.26 1.21-.6 1.73-1l2.49 1c.18.1.46.02.6-.22l2-3.46a.5.5 0 0 0-.12-.64L19.4 13ZM12 15.5A3.5 3.5 0 1 1 12 8.5a3.5 3.5 0 0 1 0 7Z"/></svg>';
+
+  var SETTINGS_KEY = 'sh_settings_v1';
+  var STATS_KEY = 'sh_stats_v1';
+
+  // ---- persistence -------------------------------------------------------
+  function save() { try { if (G) localStorage.setItem(KEY, JSON.stringify(G)); } catch (e) {} }
+  function loadSaved() { try { var s = localStorage.getItem(KEY); return s ? JSON.parse(s) : null; } catch (e) { return null; } }
+  function clearSaved() { try { localStorage.removeItem(KEY); } catch (e) {} }
+
+  var settings = { sound: true, tips: false, markers: true };
+  function loadSettings() {
+    try { var s = localStorage.getItem(SETTINGS_KEY); if (s) { var o = JSON.parse(s); for (var k in o) settings[k] = o[k]; } } catch (e) {}
+  }
+  function saveSettings() { try { localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings)); } catch (e) {} }
+
+  function loadStats() { try { var s = localStorage.getItem(STATS_KEY); return s ? JSON.parse(s) : { games: 0, liberal: 0, fascist: 0 }; } catch (e) { return { games: 0, liberal: 0, fascist: 0 }; } }
+  function recordResult(winner) {
+    var st = loadStats();
+    st.games++; st[winner] = (st[winner] || 0) + 1;
+    try { localStorage.setItem(STATS_KEY, JSON.stringify(st)); } catch (e) {}
+  }
+
+  // ---- sound (guarded; no-ops without WebAudio, e.g. in tests) -----------
+  function sfx(name) { try { if (settings.sound && window.SHSound) window.SHSound.play(name); } catch (e) {} }
+  function soundAfterVote() { if (!G || G.phase === 'game_over') return; sfx(G.phase === 'legislative_president' ? 'elected' : 'rejected'); }
+
+  // ---- small helpers -----------------------------------------------------
+  function esc(s) {
+    return ('' + (s == null ? '' : s)).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+  function seed() { return ((Date.now() >>> 0) ^ Math.floor(Math.random() * 0xffffffff)) >>> 0; }
+  function nameOf(id) { return G ? SH.nameOf(G, id) : '?'; }
+  function setUiPhase() {
+    // reset per-phase transient state when the engine phase changes
+    if (ui.phase !== G.phase) {
+      ui.phase = G.phase;
+      ui.gate = true;          // most phases start gated behind a handoff
+      ui.voteIdx = 0;
+      ui.voterGate = true;
+      ui.showResult = false;
+      ui.confirm = null;
+      ui.openVotes = null;     // 'open' voting selections
+      ui.jaCount = null;       // 'table' voting exact-tally stepper
+      // NOTE: ui.powerResult is intentionally NOT reset here. A power (investigate/
+      // peek) advances the engine to the next round immediately, so the private
+      // result must survive that phase change until the President taps "continue".
+    }
+  }
+
+  // ===========================================================================
+  // RENDER DISPATCH
+  // ===========================================================================
+  function render() {
+    if (view === 'game' && G) { setUiPhase(); }
+    // Centralized game-over side effects (recorded once per game).
+    if (view === 'game' && G && G.phase === 'game_over' && !G._recorded) {
+      G._recorded = true; recordResult(G.winner); sfx(G.winner === 'liberal' ? 'winLib' : 'winFas'); save();
+    }
+    var html;
+    if (view === 'home') html = renderHome();
+    else if (view === 'setup') html = renderSetup();
+    else if (view === 'rules') html = renderRules();
+    else if (view === 'log') html = renderLog();
+    else if (view === 'settings') html = renderSettings();
+    else if (view === 'recap') html = renderRecap();
+    else if (view === 'game') html = renderGame();
+    else html = renderHome();
+    app.innerHTML = html;
+    app.scrollTop = 0;
+    window.scrollTo(0, 0);
+    scheduleBots();
+  }
+
+  // ===========================================================================
+  // BOT AUTO-PLAY
+  // ===========================================================================
+  function castBotVotes() {
+    if (!G || G.phase !== 'voting') return false;
+    var any = false;
+    SH.alivePlayers(G).forEach(function (p) {
+      if (p.isBot && !G.votes[p.id]) { SH.castVote(G, p.id, Bot.vote(G, p.id)); any = true; }
+    });
+    return any;
+  }
+
+  function botTargets(power) {
+    var pres = G.currentPresidentId;
+    return G.players.filter(function (p) {
+      return p.alive && p.id !== pres && !(power === 'investigate' && p.investigated);
+    }).map(function (p) { return p.id; });
+  }
+
+  function applyBotPower(pres) {
+    var power = G.pendingPower;
+    switch (power) {
+      case 'investigate': SH.powerInvestigate(G, Bot.powerTarget(G, pres.id, power, botTargets(power))); break;
+      case 'bugging': SH.powerBugging(G, Bot.powerTarget(G, pres.id, power, botTargets(power))); break;
+      case 'special_election': SH.powerSpecialElection(G, Bot.powerTarget(G, pres.id, power, botTargets(power))); break;
+      case 'execution': SH.powerExecution(G, Bot.powerTarget(G, pres.id, power, botTargets(power))); break;
+      case 'policy_peek': SH.powerPolicyPeek(G); break;
+      case 'confession': SH.powerConfession(G); break;
+      case 'five_year_plan': SH.powerFiveYearPlan(G); break;
+      case 'radicalisation': {
+        var tgt = Bot.powerTarget(G, pres.id, power, botTargets(power));
+        var success = SH.powerRadicalise(G, tgt);
+        var tp = SH.getPlayer(G, tgt);
+        if (tp && !tp.isBot) ui.conversionReveal = { targetId: tgt, success: success, gate: true };
+        break;
+      }
+    }
+    sfx('power');
+  }
+
+  // Is the current required actor a bot (so the app should auto-play)?
+  function botCanAct() {
+    if (!G || view !== 'game' || G.phase === 'game_over') return false;
+    if (ui.powerResult || ui.conversionReveal) return false; // human must dismiss a private reveal
+    var hasHumans = G.players.some(function (p) { return !p.isBot; });
+    if (G.phase === 'reveal') return !hasHumans;
+    var pres = SH.getPlayer(G, G.currentPresidentId);
+    switch (G.phase) {
+      case 'nomination': return pres.isBot;
+      case 'voting': {
+        var humanAlive = SH.alivePlayers(G).filter(function (p) { return !p.isBot; });
+        var botsPending = SH.alivePlayers(G).some(function (p) { return p.isBot && !G.votes[p.id]; });
+        return botsPending || humanAlive.length === 0;
+      }
+      case 'legislative_president': return pres.isBot;
+      case 'legislative_chancellor': return SH.getPlayer(G, G.nomineeChancellorId).isBot;
+      case 'veto_consent': return pres.isBot;
+      case 'power': return pres.isBot;
+      default: return false;
+    }
+  }
+
+  // Perform ONE automatic step; returns true if it acted.
+  function botStep() {
+    if (!botCanAct()) return false;
+    var hasHumans = G.players.some(function (p) { return !p.isBot; });
+    if (G.phase === 'reveal') {
+      if (ui.revealIntro) { ui.revealIntro = false; render(); return true; }
+      SH.beginPlay(G); ui = {}; save(); render(); return true;
+    }
+    var pres = SH.getPlayer(G, G.currentPresidentId);
+    switch (G.phase) {
+      case 'nomination':
+        SH.nominate(G, Bot.nominate(G, pres.id, SH.nominationCandidates(G).ids)); sfx('tap'); save(); render(); return true;
+      case 'voting': {
+        if (castBotVotes()) { save(); render(); return true; }
+        var humanAlive = SH.alivePlayers(G).filter(function (p) { return !p.isBot; });
+        if (humanAlive.length === 0) { SH.resolveVotes(G); soundAfterVote(); save(); render(); return true; }
+        return false;
+      }
+      case 'legislative_president':
+        SH.presidentDiscard(G, Bot.presidentDiscard(G, pres.id)); sfx('tap'); save(); render(); return true;
+      case 'legislative_chancellor': {
+        var ch = SH.getPlayer(G, G.nomineeChancellorId);
+        var act = Bot.chancellorAction(G, ch.id);
+        if (act.veto) { SH.chancellorRequestVeto(G); }
+        else { var col = G.chancellorPolicies[act.index]; SH.chancellorEnact(G, act.index); sfx(col === 'L' ? 'policyLib' : (col === 'C' ? 'power' : 'policyFas')); if (G.phase === 'power') sfx('power'); }
+        save(); render(); return true;
+      }
+      case 'veto_consent':
+        SH.presidentConsentVeto(G, Bot.vetoConsent(G, pres.id)); soundAfterVote(); save(); render(); return true;
+      case 'power':
+        applyBotPower(pres); save(); render(); return true;
+      default: return false;
+    }
+  }
+
+  function scheduleBots() {
+    if (ui._botTimer) { try { clearTimeout(ui._botTimer); } catch (e) {} ui._botTimer = null; }
+    if (botCanAct()) {
+      ui._botTimer = setTimeout(function () { ui._botTimer = null; botStep(); }, BOT_DELAY);
+    }
+  }
+
+  // ===========================================================================
+  // HOME
+  // ===========================================================================
+  function renderHome() {
+    var saved = loadSaved();
+    var resume = (saved && saved.phase !== 'game_over')
+      ? '<button class="btn primary" data-action="resume">Resume game (' + esc(saved.players.length) + ' players)</button>'
+      : '';
+    var st = loadStats();
+    var statsLine = st.games > 0
+      ? '<p class="small muted center">' + st.games + ' games played · Liberals ' + (st.liberal || 0) + ' · Fascists ' + (st.fascist || 0) + (st.communist ? ' · Communists ' + st.communist : '') + '</p>'
+      : '';
+    return [
+      '<div class="center hero" style="padding-top:30px">',
+      '<div class="emblem"><svg viewBox="0 0 80 44" width="78" height="44" fill="none" stroke="#c8a24a" stroke-width="2.6" stroke-linejoin="round"><path d="M3 22 C 18 5, 62 5, 77 22 C 62 39, 18 39, 3 22 Z"/><circle cx="40" cy="22" r="9" fill="#c8a24a" stroke="none"/><circle cx="40" cy="22" r="3.4" fill="#0f0d0b"/></svg></div>',
+      '<h1>SECRET HITLER</h1>',
+      '<p class="muted">Pass-and-play · one device · 5–10 players</p>',
+      '</div>',
+      '<div class="spacer"></div>',
+      resume,
+      '<button class="btn primary" data-action="newgame">New game</button>',
+      '<button class="btn" data-action="rules">How to play</button>',
+      '<button class="btn ghost" data-action="openSettings">Settings</button>',
+      statsLine,
+      '<div class="spacer"></div>',
+      '<p class="small muted center">A hidden-role game of deception. The app deals roles and runs the board, deck, powers, and win conditions — you bring the table talk.</p>',
+      '<p class="small muted center">Secret Hitler © its creators · CC BY-NC-SA 4.0 · non-commercial.</p>'
+    ].join('');
+  }
+
+  // ===========================================================================
+  // SETTINGS
+  // ===========================================================================
+  function renderSettings() {
+    var st = loadStats();
+    function row(key, label, desc) {
+      return '<div class="row" style="margin:14px 0"><div class="grow"><div>' + esc(label) + '</div><div class="small muted">' + esc(desc) + '</div></div>' +
+        '<button class="iconbtn" data-action="toggleSetting" data-arg="' + key + '">' + (settings[key] ? 'On' : 'Off') + '</button></div>';
+    }
+    return [
+      topbar('Settings', '<button class="iconbtn" data-action="backFromSettings">Done</button>'),
+      '<div class="panel">',
+      row('sound', 'Sound effects', 'Subtle synthesized cues for votes, policies, and powers.'),
+      row('tips', 'Guidance tips', 'Extra on-screen hints explaining each phase — great for new groups.'),
+      row('markers', 'Confirmed-not-Hitler markers', 'Mark players proven not to be Hitler (elected Chancellor after 3 Fascist policies).'),
+      '</div>',
+      '<div class="panel"><h3>This device</h3>',
+      '<div class="kv"><span>Games played</span><span>' + st.games + '</span></div>',
+      '<div class="kv"><span>Liberal wins</span><span>' + (st.liberal || 0) + '</span></div>',
+      '<div class="kv"><span>Fascist wins</span><span>' + (st.fascist || 0) + '</span></div>',
+      '</div>'
+    ].join('');
+  }
+
+  // ===========================================================================
+  // SETUP + CONFIGURATION (with live validation)
+  // ===========================================================================
+  function newDraft(pc) {
+    var names = (draft && draft.playerNames) ? draft.playerNames.slice() : [];
+    var d = SH.defaultConfig(pc, names.length ? names : null);
+    return d;
+  }
+
+  function resizeNames(d) {
+    while (d.playerNames.length < d.playerCount) d.playerNames.push('Player ' + (d.playerNames.length + 1));
+    d.playerNames.length = d.playerCount;
+  }
+
+  function applyBotSeats(d) {
+    var humanCount = d.playerCount - (d.bots || 0);
+    for (var i = humanCount; i < d.playerCount; i++) d.playerNames[i] = 'Bot ' + (i - humanCount + 1);
+  }
+
+  function renderSetup() {
+    if (!draft) draft = newDraft(7);
+    resizeNames(draft);
+    applyBotSeats(draft);
+    var v = SH.validateConfig(draft);
+    var adv = !!ui.advanced;
+    var humanCount = draft.playerCount - (draft.bots || 0);
+
+    var nameInputs = draft.playerNames.map(function (n, i) {
+      if (i >= humanCount) return '<div class="kv small"><span class="muted">Seat ' + (i + 1) + '</span><span>' + esc(n) + ' <span class="badge ai">AI</span></span></div>';
+      return '<input type="text" data-name-idx="' + i + '" value="' + esc(n) + '" placeholder="Player ' + (i + 1) + '" maxlength="16" />';
+    }).join('');
+
+    var advHtml = adv ? renderAdvanced(draft) : '';
+
+    return [
+      topbar('New game', '<button class="iconbtn" data-action="home">Cancel</button>'),
+      renderPresetChips(),
+      '<div class="panel">',
+      '<h3>Players</h3>',
+      stepperRow('Number of players', 'playerCount', draft.playerCount, 2, 15),
+      stepperRow('Bots (AI players)', 'bots', draft.bots || 0, 0, draft.playerCount - 1),
+      (draft.bots || 0) > 0 ? '<p class="small muted">AI seats play automatically. With bots, voting is on-device (table voting needs all-human).</p>' : '',
+      '<label>Human names (seating order)</label>',
+      nameInputs,
+      '</div>',
+
+      '<div class="panel">',
+      '<div class="collapse-h" data-action="toggleAdvanced">',
+      '<h3 style="margin:0">Advanced configuration</h3>',
+      '<span class="iconbtn">' + (adv ? 'Hide ▲' : 'Show ▼') + '</span>',
+      '</div>',
+      adv ? '<p class="small muted" style="margin-top:10px">Everything below is fully editable. Invalid combinations are blocked; off-spec but playable ones are warned. Defaults match the official rules for ' + draft.playerCount + ' players.</p>' : '',
+      advHtml,
+      '</div>',
+
+      renderValidation(v),
+
+      '<button class="btn primary" data-action="startGame"' + (v.ok ? '' : ' disabled') + '>Deal roles &amp; start</button>',
+      '<button class="btn ghost" data-action="resetDefaults">Reset to official defaults</button>'
+    ].join('');
+  }
+
+  function renderPresetChips() {
+    var chips = Object.keys(SH.RULESETS).map(function (k) {
+      var rs = SH.RULESETS[k];
+      return '<button class="chip' + (ui.preset === k ? ' on' : '') + '" data-action="applyPreset" data-arg="' + k + '">' + esc(rs.name) + '</button>';
+    }).join('');
+    var desc = (ui.preset && SH.RULESETS[ui.preset]) ? SH.RULESETS[ui.preset].desc : 'Tap a rule set for a one-tap start, then tweak anything in Advanced.';
+    return '<div class="panel"><h3>Rule set</h3><div class="chips">' + chips + '</div><p class="small muted">' + esc(desc) + '</p></div>';
+  }
+
+  function renderValidation(v) {
+    if (v.ok && v.warnings.length === 0) {
+      return '<div class="note small">Configuration is valid and matches a playable game.</div>';
+    }
+    var out = [];
+    v.errors.forEach(function (e) { out.push('<div class="err"><span class="vtag err-tag">Blocked</span> ' + esc(e) + '</div>'); });
+    v.warnings.forEach(function (w) { out.push('<div class="warn"><span class="vtag warn-tag">Note</span> ' + esc(w) + '</div>'); });
+    return '<div style="margin:12px 0">' + out.join('') + '</div>';
+  }
+
+  function renderAdvanced(d) {
+    var powerOptions = function (sel, isLast) {
+      var opts = [['none', 'No power'], ['investigate', 'Investigate Loyalty'],
+        ['special_election', 'Special Election'], ['policy_peek', 'Policy Peek'], ['execution', 'Execution']];
+      if (isLast) return '<select disabled><option>Fascists win</option></select>';
+      return '<select data-board-idx>' + opts.map(function (o) {
+        var val = o[0] === 'none' ? 'null' : o[0];
+        return '<option value="' + val + '"' + ((sel || 'null') === val ? ' selected' : '') + '>' + o[1] + '</option>';
+      }).join('') + '</select>';
+    };
+    var boardRows = d.board.map(function (p, i) {
+      var isLast = i === d.board.length - 1;
+      return '<div class="kv"><span>' + (i + 1) + (ord(i + 1)) + ' Fascist policy</span><span style="min-width:160px">' +
+        powerOptionsIndexed(p, isLast, i) + '</span></div>';
+    }).join('');
+    var commOn = (d.roles.communists || 0) > 0;
+    var roleTotal = d.roles.liberals + d.roles.fascists + (d.roles.communists || 0) + 1;
+
+    return [
+      '<div class="spacer"></div>',
+      '<h3>Roles</h3>',
+      stepperRow('Liberals', 'roles.liberals', d.roles.liberals, 0, 14),
+      stepperRow('Fascists (excl. Hitler)', 'roles.fascists', d.roles.fascists, 0, 13),
+      commOn ? '<div class="kv small muted"><span>Communists</span><span>' + d.roles.communists + ' (see below)</span></div>' : '',
+      '<div class="kv small muted"><span>Hitler</span><span>1 (always)</span></div>',
+      '<div class="kv small"><span>Total</span><span>' + roleTotal + ' / ' + d.playerCount + '</span></div>',
+      checkboxRow('Hitler knows the Fascists (night phase)', 'hitlerKnowsFascists', d.hitlerKnowsFascists),
+
+      '<div class="spacer"></div>',
+      '<h3>Policy deck</h3>',
+      stepperRow('Liberal tiles', 'deck.liberal', d.deck.liberal, 0, 40),
+      stepperRow('Fascist tiles', 'deck.fascist', d.deck.fascist, 0, 40),
+
+      '<div class="spacer"></div>',
+      '<h3>Win conditions</h3>',
+      stepperRow('Liberal policies to win', 'win.liberal', d.win.liberal, 1, 20),
+      stepperRow('Fascist policies to win', 'win.fascist', d.win.fascist, 1, 20),
+      stepperRow('Hitler-as-Chancellor loss after N Fascist policies', 'hitlerChancellorThreshold', d.hitlerChancellorThreshold, 0, 20),
+
+      '<div class="spacer"></div>',
+      '<h3>Other</h3>',
+      stepperRow('Failed elections before chaos', 'electionTrackerMax', d.electionTrackerMax, 1, 10),
+      stepperRow('Veto unlocks at N Fascist policies', 'vetoUnlockAt', d.vetoUnlockAt, 1, 20),
+
+      '<div class="spacer"></div>',
+      '<h3>Voting</h3>',
+      '<label>How the table votes</label>',
+      '<select data-cfg-select="votingMode">',
+      votingOption('table', 'Table vote — vote IRL, app records the result', d.votingMode),
+      votingOption('open', 'Open — tap each vote on one shared screen', d.votingMode),
+      votingOption('secret', 'Secret — pass the device to vote privately', d.votingMode),
+      '</select>',
+      checkboxRow('Reveal individual votes (official: on)', 'revealVotes', d.revealVotes),
+      '<p class="small muted">The phone is still passed for hidden info (roles, the policy draw, investigate/peek). Only the public vote can be taken at the table.</p>',
+
+      '<div class="spacer"></div>',
+      '<h3>Fascist board powers</h3>',
+      '<p class="small muted">One slot per Fascist policy up to the win threshold. The last slot is always the Fascist win.</p>',
+      boardRows,
+
+      '<div class="spacer"></div>',
+      '<h3>Communist faction (XL)</h3>',
+      '<div class="row" style="margin-top:8px"><div class="grow small">Add a third Communist faction — experimental</div><button class="iconbtn" data-action="toggleCommunists">' + (commOn ? 'On' : 'Off') + '</button></div>',
+      commOn ? stepperRow('Communists', 'roles.communists', d.roles.communists, 1, 6) : '',
+      commOn ? stepperRow('Communist tiles in deck', 'deck.communist', d.deck.communist, 0, 30) : '',
+      commOn ? stepperRow('Communist policies to win', 'win.communist', d.win.communist, 1, 12) : '',
+      commOn ? checkboxRow('Communists know each other', 'communistsKnowEachOther', d.communistsKnowEachOther) : '',
+      commOn ? '<p class="small muted">A fun but experimental variant — balance is not officially tuned. Powers: Bugging, Radicalisation, Confession, Five-Year Plan.</p>' : ''
+    ].join('');
+  }
+
+  // board power selects need indexes; render explicitly
+  function powerOptionsIndexed(sel, isLast, idx) {
+    if (isLast) return '<select disabled><option>Fascists win</option></select>';
+    var opts = [['null', 'No power'], ['investigate', 'Investigate Loyalty'],
+      ['special_election', 'Special Election'], ['policy_peek', 'Policy Peek'], ['execution', 'Execution']];
+    var cur = (sel == null) ? 'null' : sel;
+    return '<select data-board-idx="' + idx + '">' + opts.map(function (o) {
+      return '<option value="' + o[0] + '"' + (cur === o[0] ? ' selected' : '') + '>' + o[1] + '</option>';
+    }).join('') + '</select>';
+  }
+
+  function ord(n) { var s = ['th', 'st', 'nd', 'rd'], v = n % 100; return (s[(v - 20) % 10] || s[v] || s[0]); }
+
+  function votingOption(val, label, cur) {
+    return '<option value="' + val + '"' + (cur === val ? ' selected' : '') + '>' + esc(label) + '</option>';
+  }
+
+  function stepperRow(label, path, val, min, max) {
+    return [
+      '<label>' + esc(label) + '</label>',
+      '<div class="stepper" data-stepper="' + path + '" data-min="' + min + '" data-max="' + max + '">',
+      '<button data-step="-1">−</button>',
+      '<div class="val">' + val + '</div>',
+      '<button data-step="1">+</button>',
+      '</div>'
+    ].join('');
+  }
+  function checkboxRow(label, path, val) {
+    return '<div class="row" style="margin-top:12px"><div class="grow small">' + esc(label) + '</div>' +
+      '<button class="iconbtn" data-toggle="' + path + '">' + (val ? 'On' : 'Off') + '</button></div>';
+  }
+
+  // ===========================================================================
+  // GAME
+  // ===========================================================================
+  function renderGame() {
+    if (G.phase === 'reveal') return renderReveal();
+    if (G.phase === 'game_over') return renderGameOver();
+
+    // A resolved power (investigate/peek) has already advanced the engine to the
+    // next round, but its PRIVATE result must still be shown to the President.
+    if (ui.powerResult) {
+      return [
+        topbar('Round ' + G.round, ''),
+        renderBoard(),
+        '<div class="panel center"><h2>' + esc(ui.powerResult.title) + '</h2>' + ui.powerResult.body +
+        '<button class="btn primary" data-action="powerDone">Hide &amp; continue</button></div>'
+      ].join('');
+    }
+
+    // Radicalisation result is private to the TARGET (passed the device), not the President.
+    if (ui.conversionReveal) {
+      var cr = ui.conversionReveal;
+      var t = SH.getPlayer(G, cr.targetId);
+      if (cr.gate) {
+        return [topbar('Round ' + G.round, ''), renderBoard(),
+          passScreen(t.name, 'A power targets you — make sure only you can see the screen.', 'I am ' + esc(t.name), 'convReveal')].join('');
+      }
+      var cbody = cr.success
+        ? '<div class="rolecard communist flip"><div class="muted">' + esc(t.name) + ', you have been</div><div class="big">RADICALISED</div><div class="small">You are now a Communist — you win with the Communist team.</div></div><p class="small muted">Keep it secret and pursue the Communist agenda.</p>'
+        : '<div class="rolecard hitler flip"><div class="muted">' + esc(t.name) + '</div><div class="big">IMMUNE</div><div class="small">You cannot be radicalised — your secret role is unchanged.</div></div>';
+      return [topbar('Round ' + G.round, ''), renderBoard(),
+        '<div class="panel center">' + cbody + '<button class="btn primary" data-action="convDone">Hide &amp; continue</button></div>'].join('');
+    }
+
+    var body;
+    switch (G.phase) {
+      case 'nomination': body = renderNomination(); break;
+      case 'voting': body = renderVoting(); break;
+      case 'legislative_president': body = renderLegPresident(); break;
+      case 'legislative_chancellor': body = renderLegChancellor(); break;
+      case 'veto_consent': body = renderVetoConsent(); break;
+      case 'power': body = renderPower(); break;
+      default: body = '<div class="panel">Unknown phase: ' + esc(G.phase) + '</div>';
+    }
+    return [
+      topbar('Round ' + G.round, '<button class="iconbtn" data-action="viewLog">Log</button> <button class="iconbtn" data-action="openSettings" aria-label="Settings">' + GEAR_SVG + '</button> <button class="iconbtn" data-action="menu">Menu</button>'),
+      renderBoard(),
+      body
+    ].join('');
+  }
+
+  function policyName(c) { return c === 'L' ? 'Liberal' : 'Fascist'; }
+
+  function renderBoard() {
+    var c = G.config;
+    // Liberal track
+    var lib = [];
+    for (var i = 0; i < c.win.liberal; i++) {
+      lib.push('<div class="slot lib' + (i < G.liberalPolicies ? ' filled' : '') + '">' + (i < G.liberalPolicies ? 'L' : '') + '</div>');
+    }
+    // Fascist track with powers
+    var fas = [];
+    for (var j = 0; j < c.win.fascist; j++) {
+      var pw = c.board[j];
+      var lbl = (j === c.win.fascist - 1) ? 'WIN' : powerShort(pw);
+      fas.push('<div class="slot fas' + (j < G.fascistPolicies ? ' filled' : '') + '">' +
+        (j < G.fascistPolicies ? 'F' : '<span class="pw">' + lbl + '</span>') + '</div>');
+    }
+    // Communist track (XL) — only when the expansion is enabled
+    var commEnabled = (c.roles.communists || 0) > 0;
+    var comm = [];
+    if (commEnabled) {
+      for (var ci = 0; ci < c.win.communist; ci++) {
+        var cpw = c.communistBoard[ci];
+        var clbl = (ci === c.win.communist - 1) ? 'WIN' : powerShort(cpw);
+        comm.push('<div class="slot comm' + (ci < G.communistPolicies ? ' filled' : '') + '">' +
+          (ci < G.communistPolicies ? 'C' : '<span class="pw">' + clbl + '</span>') + '</div>');
+      }
+    }
+
+    // tracker dots
+    var dots = [];
+    for (var k = 0; k < c.electionTrackerMax; k++) dots.push('<div class="dot' + (k < G.electionTracker ? ' on' : '') + '"></div>');
+
+    // players
+    var pls = G.players.map(function (p) {
+      var badges = '';
+      if (p.isBot) badges += '<span class="badge ai">AI</span>';
+      if (p.id === G.currentPresidentId) badges += '<span class="badge pres">PRES</span>';
+      if (p.id === G.nomineeChancellorId && G.phase === 'voting') badges += '<span class="badge chanc">nominee</span>';
+      if (G.lastElected && p.id === G.lastElected.chancellor) badges += '<span class="badge chanc">last Chanc</span>';
+      if (settings.markers && p.clearedNotHitler && p.alive) badges += '<span class="badge">not Hitler</span>';
+      if (p.partyRevealed && p.alive) badges += '<span class="badge party-' + p.partyRevealed.toLowerCase() + '">' + esc(p.partyRevealed) + '</span>';
+      return '<div class="pl' + (p.alive ? '' : ' dead') + '"><span class="grow">' + esc(p.name) + '</span>' + badges + '</div>';
+    }).join('');
+
+    return [
+      '<div class="panel tight">',
+      '<div class="row"><div class="grow"><h3 style="margin:0">Liberal ' + G.liberalPolicies + '/' + c.win.liberal + '</h3></div></div>',
+      '<div class="track">' + lib.join('') + '</div>',
+      '<div class="row"><div class="grow"><h3 style="margin:0">Fascist ' + G.fascistPolicies + '/' + c.win.fascist + '</h3></div>',
+      (G.vetoUnlocked ? '<span class="tag">veto unlocked</span>' : '') + '</div>',
+      '<div class="track">' + fas.join('') + '</div>',
+      commEnabled ? '<div class="row"><div class="grow"><h3 style="margin:0">Communist ' + G.communistPolicies + '/' + c.win.communist + '</h3></div></div>' : '',
+      commEnabled ? '<div class="track">' + comm.join('') + '</div>' : '',
+      '<div class="row" style="margin-top:8px"><span class="small muted grow">Election tracker</span><div class="tracker-dots">' + dots.join('') + '</div></div>',
+      '<div class="small muted center" style="margin-top:8px">Liberals need ' + Math.max(0, c.win.liberal - G.liberalPolicies) + ' more · Fascists need ' + Math.max(0, c.win.fascist - G.fascistPolicies) + ' more' +
+        (commEnabled ? ' · Communists need ' + Math.max(0, c.win.communist - G.communistPolicies) + ' more' : '') +
+        (G.fascistPolicies >= G.config.hitlerChancellorThreshold ? ' · <b class="danger-text">Hitler as Chancellor now loses</b>' : '') + '</div>',
+      '</div>',
+      '<div class="panel tight"><div class="players">' + pls + '</div></div>'
+    ].join('');
+  }
+
+  function tip(text) { return settings.tips ? '<div class="note small"><span class="tiptag">Tip</span> ' + esc(text) + '</div>' : ''; }
+
+  function powerShort(p) {
+    return { investigate: 'INVEST.', special_election: 'SP. ELEC', policy_peek: 'PEEK', execution: 'EXECUTE',
+      bugging: 'BUG', radicalisation: 'RADICAL', confession: 'CONFESS', five_year_plan: '5-YR', win: 'WIN' }[p] || '—';
+  }
+
+  // ---- Reveal (night phase) ---------------------------------------------
+  function renderReveal() {
+    if (ui.revealIdx == null) { ui.revealIdx = 0; ui.revealShown = false; ui.revealIntro = true; }
+
+    if (ui.revealIntro) {
+      var nComm = G.config.roles.communists || 0;
+      var compo = G.config.roles.liberals + ' Liberals · ' + G.config.roles.fascists + ' Fascist' +
+        (G.config.roles.fascists === 1 ? '' : 's') +
+        (nComm > 0 ? ' · ' + nComm + ' Communist' + (nComm === 1 ? '' : 's') : '') +
+        ' · 1 Hitler';
+      return [
+        topbar('Secret roles', ''),
+        '<div class="panel center">',
+        '<h2>Pass the device around</h2>',
+        '<p class="muted">Each player privately views their secret role. Hand the phone to the first player and don\'t let anyone else see the screen.</p>',
+        '<div class="note">This game: ' + esc(compo) + '.</div>',
+        G.config.hitlerKnowsFascists
+          ? '<p class="small muted">Small game: Hitler will see the Fascists, and the Fascists will see Hitler.</p>'
+          : '<p class="small muted">Fascists will see each other and Hitler. Hitler will <b>not</b> know who the Fascists are.</p>',
+        nComm > 0 ? '<p class="small muted">Communists are a <b>third team</b> with their own track — they will see each other.</p>' : '',
+        '</div>',
+        '<button class="btn primary" data-action="revealStart">Begin role reveal</button>'
+      ].join('');
+    }
+
+    var players = G.players.filter(function (p) { return !p.isBot; }); // bots have no reveal
+    if (ui.revealIdx >= players.length) {
+      return [
+        topbar('Secret roles', ''),
+        '<div class="panel center"><h2>' + (players.length ? 'Everyone has their role' : 'Roles dealt') + '</h2>',
+        '<p class="muted">Put the device down where the table can see it. ' + esc(nameOf(G.currentPresidentId)) + ' is the first Presidential Candidate.</p></div>',
+        '<button class="btn primary" data-action="beginPlay">Start the game</button>'
+      ].join('');
+    }
+
+    var p = players[ui.revealIdx];
+    if (!ui.revealShown) {
+      return passScreen(p.name, 'Make sure only ' + esc(p.name) + ' can see the screen.', 'I am ' + esc(p.name) + ' — show my role', 'revealShow');
+    }
+
+    var info = SH.revealInfo(G, p.id);
+    var roleLabel = info.role === 'hitler' ? 'HITLER' : info.role.toUpperCase();
+    var knows = '';
+    if (info.knows.length) {
+      knows = '<div class="note"><b>You know:</b><br>' + info.knows.map(function (k) {
+        return esc(k.name) + ' — ' + esc(k.label);
+      }).join('<br>') + '</div>';
+    } else if (info.role === 'hitler') {
+      knows = '<div class="note">You do not know your Fascists. Earn their trust and stay hidden.</div>';
+    } else if (info.role === 'liberal') {
+      knows = '<div class="note">You know no one. Deduce who the Fascists are.</div>';
+    } else if (info.role === 'communist') {
+      knows = '<div class="note">You are the lone Communist — pursue your own agenda.</div>';
+    }
+    var teamNote;
+    if (info.role === 'liberal') teamNote = 'You win by enacting ' + G.config.win.liberal + ' Liberal Policies or by killing Hitler.';
+    else if (info.role === 'communist') teamNote = 'You win by enacting ' + G.config.win.communist + ' Communist Policies — a third team, neither Liberal nor Fascist.';
+    else teamNote = 'You win by enacting ' + G.config.win.fascist + ' Fascist Policies, or by electing Hitler Chancellor after ' + G.config.hitlerChancellorThreshold + ' Fascist Policies.';
+    var teamLabel = info.role === 'liberal' ? 'Liberal team' : (info.role === 'communist' ? 'Communist team' : 'Fascist team');
+
+    return [
+      topbar('Secret roles', ''),
+      '<div class="rolecard ' + info.role + ' flip">',
+      '<div class="muted">' + esc(p.name) + ', you are</div>',
+      '<div class="big">' + roleLabel + '</div>',
+      '<div class="small">' + teamLabel + '</div>',
+      '</div>',
+      knows,
+      '<p class="small muted">' + teamNote + '</p>',
+      '<button class="btn primary" data-action="revealNext">Hide &amp; pass to next player</button>'
+    ].join('');
+  }
+
+  // ---- Nomination -------------------------------------------------------
+  function renderNomination() {
+    var pres = G.currentPresidentId;
+    var nc = SH.nominationCandidates(G);
+    var elig = nc.ids;
+    var buttons = G.players.filter(function (p) { return p.alive && p.id !== pres; }).map(function (p) {
+      var ok = elig.indexOf(p.id) !== -1;
+      var reason = '';
+      if (!ok) {
+        if (G.lastElected.chancellor === p.id) reason = ' (last Chancellor)';
+        else if (G.lastElected.president === p.id) reason = ' (last President)';
+        else reason = ' (ineligible)';
+      }
+      return '<button class="btn' + (ok ? '' : ' ghost') + '"' + (ok ? ' data-action="nominate" data-arg="' + p.id + '"' : ' disabled') +
+        '>' + esc(p.name) + (ok ? '' : '<span class="small muted">' + reason + '</span>') + '</button>';
+    }).join('');
+    return [
+      '<div class="panel">',
+      '<h2>' + esc(nameOf(pres)) + ' is President</h2>',
+      '<p class="muted">Discuss, then nominate a Chancellor.' + (nc.relaxed ? '' : ' Term-limited players are greyed out.') + '</p>',
+      nc.relaxed ? '<div class="warn small">No term-eligible candidate remained, so term limits are relaxed for this election.</div>' : '',
+      tip('The whole table will vote Ja/Nein on this pair. Pick someone you can get approved — and watch who objects.'),
+      buttons,
+      '</div>'
+    ].join('');
+  }
+
+  // ---- Voting (mode-dependent) ------------------------------------------
+  function renderVoting() {
+    castBotVotes(); // AI seats vote programmatically
+    var alive = SH.alivePlayers(G);
+    var humanAlive = alive.filter(function (p) { return !p.isBot; });
+    var govLine = 'President ' + esc(nameOf(G.currentPresidentId)) + ' · Chancellor ' + esc(nameOf(G.nomineeChancellorId));
+    var mode = G.config.votingMode;
+    if (mode === 'table' && (G.config.bots || 0) > 0) mode = 'secret'; // bots can't vote at the table
+
+    // Shared "votes are in" reveal once all HUMANS have voted (bots already have).
+    if ((mode === 'secret' || mode === 'open') && ui.voteIdx >= humanAlive.length) {
+      return renderTally(alive, govLine);
+    }
+    if (mode === 'table') return renderTableVote(alive, govLine);
+    if (mode === 'open') return renderOpenVote(humanAlive, govLine);
+    return renderSecretVote(humanAlive, govLine);
+  }
+
+  function renderTally(alive, govLine) {
+    var ja = 0, nein = 0, rows = '';
+    alive.forEach(function (p) {
+      var vt = G.votes[p.id];
+      if (vt === 'ja') ja++; else nein++;
+      rows += '<div class="kv"><span>' + esc(p.name) + '</span><span class="' + (vt === 'ja' ? '' : 'muted') + '">' +
+        (G.config.revealVotes ? (vt === 'ja' ? 'JA' : 'NEIN') : '•') + '</span></div>';
+    });
+    var passed = ja * 2 > alive.length;
+    return [
+      '<div class="panel">',
+      '<h2>Votes are in</h2>',
+      '<p class="muted">' + govLine + '</p>',
+      G.config.revealVotes ? rows : '<p class="small muted">Individual votes are hidden (house rule).</p>',
+      '<div class="kv"><b>' + ja + ' Ja / ' + nein + ' Nein</b><b class="' + (passed ? '' : 'muted') + '">' + (passed ? 'ELECTED' : 'REJECTED') + '</b></div>',
+      '<button class="btn primary" data-action="resolveVotes">Continue</button>',
+      '</div>'
+    ].join('');
+  }
+
+  function renderTableVote(alive, govLine) {
+    if (ui.jaCount == null) ui.jaCount = 0;
+    return [
+      '<div class="panel">',
+      '<h2>Table vote</h2>',
+      '<p class="muted">' + govLine + '</p>',
+      '<div class="note small">Everyone votes out loud or with Ja/Nein cards at the same time. Then record the result.</div>',
+      tip('A tie FAILS — you need strictly more Ja than Nein. Three failed elections in a row triggers chaos.'),
+      '<div class="row" style="gap:12px;margin-top:6px">',
+      '<button class="btn lib grow" data-action="quickResult" data-arg="pass">PASSED</button>',
+      '<button class="btn fas grow" data-action="quickResult" data-arg="fail">FAILED</button>',
+      '</div>',
+      '<p class="small muted center" style="margin-top:14px">or log the exact tally</p>',
+      '<div class="row" style="justify-content:center;gap:10px">',
+      '<button class="iconbtn" data-action="jaDec">−</button>',
+      '<div style="min-width:130px;text-align:center"><b>' + ui.jaCount + '</b> Ja / ' + (alive.length - ui.jaCount) + ' Nein</div>',
+      '<button class="iconbtn" data-action="jaInc">+</button>',
+      '</div>',
+      '<button class="btn ghost" data-action="quickCount">Record this tally</button>',
+      '</div>'
+    ].join('');
+  }
+
+  function renderOpenVote(alive, govLine) {
+    if (!ui.openVotes) ui.openVotes = {};
+    var rows = alive.map(function (p) {
+      var sel = ui.openVotes[p.id];
+      return '<div class="pl"><span class="grow">' + esc(p.name) + '</span>' +
+        '<button class="btn sm ' + (sel === 'ja' ? 'lib' : 'ghost') + '" data-action="openSet" data-arg="' + p.id + ':ja">Ja</button>' +
+        '<button class="btn sm ' + (sel === 'nein' ? 'fas' : 'ghost') + '" data-action="openSet" data-arg="' + p.id + ':nein">Nein</button>' +
+        '</div>';
+    }).join('');
+    var allSet = alive.every(function (p) { return ui.openVotes[p.id]; });
+    return [
+      '<div class="panel">',
+      '<h2>Open vote</h2>',
+      '<p class="muted">' + govLine + '</p>',
+      '<div class="note small">Tap each player\'s public vote. Everyone can see this screen.</div>',
+      '<div class="players">' + rows + '</div>',
+      '<button class="btn primary" data-action="openSubmit"' + (allSet ? '' : ' disabled') + '>Reveal result</button>',
+      '</div>'
+    ].join('');
+  }
+
+  function renderSecretVote(alive, govLine) {
+    var voter = alive[ui.voteIdx];
+    if (ui.voterGate) {
+      return passScreen(voter.name, 'Vote on: ' + govLine, 'I am ' + esc(voter.name) + ' — vote', 'voteReveal');
+    }
+    return [
+      '<div class="panel center">',
+      '<h3>' + esc(voter.name) + ', vote on the government</h3>',
+      '<p class="muted">' + govLine + '</p>',
+      '<div class="row" style="gap:12px">',
+      '<button class="btn lib grow" data-action="vote" data-arg="ja">JA!</button>',
+      '<button class="btn fas grow" data-action="vote" data-arg="nein">NEIN</button>',
+      '</div>',
+      '<p class="small muted">' + (ui.voteIdx + 1) + ' of ' + alive.length + ' voting privately</p>',
+      '</div>'
+    ].join('');
+  }
+
+  // ---- Legislative: President -------------------------------------------
+  function renderLegPresident() {
+    if (ui.gate) {
+      return passScreen(nameOf(G.currentPresidentId), 'Legislative session — President only. No talking during this phase.',
+        'I am ' + esc(nameOf(G.currentPresidentId)) + ' (President)', 'ungate');
+    }
+    var tiles = G.drawnPolicies.map(function (c, i) {
+      return '<div class="tile ' + c + ' pick" data-action="presDiscard" data-arg="' + i + '">' + policyName(c).toUpperCase() + '<span class="small">discard</span></div>';
+    }).join('');
+    return [
+      '<div class="panel">',
+      '<h2>President: discard one</h2>',
+      '<p class="muted">You drew 3 policies. Tap one to <b>discard</b> it; the other two pass to Chancellor ' + esc(nameOf(G.nomineeChancellorId)) + '. Nobody sees what you discard.</p>',
+      tip('Afterward you may claim anything about what you drew. Fascists exploit this — and so can a desperate Liberal.'),
+      '<div class="tiles">' + tiles + '</div>',
+      '</div>'
+    ].join('');
+  }
+
+  // ---- Legislative: Chancellor ------------------------------------------
+  function renderLegChancellor() {
+    if (ui.gate) {
+      return passScreen(nameOf(G.nomineeChancellorId), 'Legislative session — Chancellor only. No talking.',
+        'I am ' + esc(nameOf(G.nomineeChancellorId)) + ' (Chancellor)', 'ungate');
+    }
+    var tiles = G.chancellorPolicies.map(function (c, i) {
+      return '<div class="tile ' + c + ' pick" data-action="chancEnact" data-arg="' + i + '">' + policyName(c).toUpperCase() + '<span class="small">enact</span></div>';
+    }).join('');
+    var veto = (G.vetoUnlocked && !G.vetoRefused)
+      ? '<button class="btn ghost" data-action="requestVeto">Propose veto (discard both)</button>'
+      : '';
+    return [
+      '<div class="panel">',
+      '<h2>Chancellor: enact one</h2>',
+      '<p class="muted">Tap a policy to <b>enact</b> it. The other is discarded secretly.</p>',
+      tip('If you were only handed Fascist policies, you must enact one — but you can blame the President. They might be lying too.'),
+      '<div class="tiles">' + tiles + '</div>',
+      veto,
+      '</div>'
+    ].join('');
+  }
+
+  function renderVetoConsent() {
+    if (ui.gate) {
+      return passScreen(nameOf(G.currentPresidentId), 'The Chancellor proposed a veto.',
+        'I am ' + esc(nameOf(G.currentPresidentId)) + ' (President)', 'ungate');
+    }
+    return [
+      '<div class="panel center">',
+      '<h2>Veto proposed</h2>',
+      '<p class="muted">Chancellor ' + esc(nameOf(G.nomineeChancellorId)) + ' wants to discard the entire agenda. Do you agree? (This advances the election tracker.)</p>',
+      '<div class="row" style="gap:12px">',
+      '<button class="btn danger grow" data-action="consentVeto" data-arg="1">Agree to veto</button>',
+      '<button class="btn grow" data-action="consentVeto" data-arg="0">Refuse</button>',
+      '</div></div>'
+    ].join('');
+  }
+
+  // ---- Powers -----------------------------------------------------------
+  function powerButtonPanel(title, help, action, btnLabel) {
+    return [
+      '<div class="panel center">',
+      '<h2>' + esc(title) + '</h2>',
+      '<p class="muted">' + esc(help) + '</p>',
+      '<button class="btn primary" data-action="' + action + '">' + esc(btnLabel) + '</button>',
+      '</div>'
+    ].join('');
+  }
+
+  function renderPower() {
+    var pres = G.currentPresidentId;
+    if (ui.gate) {
+      return passScreen(nameOf(pres), 'Presidential power: ' + SH.POWER_LABELS[G.pendingPower] + '.',
+        'I am ' + esc(nameOf(pres)) + ' (President)', 'ungate');
+    }
+
+    var power = G.pendingPower;
+
+    // no-target powers
+    if (power === 'policy_peek') return powerButtonPanel('Policy Peek', 'Secretly view the top 3 policies (order preserved).', 'doPeek', 'Reveal top 3');
+    if (power === 'confession') return powerButtonPanel('Confession', 'Your Party will be revealed publicly to the whole table — and shown on the board.', 'doConfess', 'Confess publicly');
+    if (power === 'five_year_plan') return powerButtonPanel('Five-Year Plan', 'Shuffle 2 Communist and 1 Liberal policy into the deck.', 'doFiveYear', 'Enact the plan');
+
+    // target-picker powers
+    var meta = {
+      investigate: { label: 'Investigate Loyalty', help: 'Choose a player to inspect. You (only) see their Party — Liberal or Fascist. Each player can be investigated once.', act: 'doInvestigate', noInvestigated: true },
+      bugging: { label: 'Bugging', help: 'Choose a player to bug. You (only) see their Party — Liberal, Fascist, or Communist.', act: 'doBugging' },
+      special_election: { label: 'Call Special Election', help: 'Choose any player to be the next Presidential Candidate. Rotation resumes to your left afterward.', act: 'doSpecial' },
+      execution: { label: 'Execution', help: 'Choose a player to execute. They are out of the game. If they are Hitler, the Liberals win.', act: 'doExecute', danger: true },
+      radicalisation: { label: 'Radicalisation', help: 'Choose a player to convert to the Communist party. Hitler cannot be converted. The result is shown privately to them.', act: 'doRadicalise' }
+    }[power];
+
+    var list = G.players.filter(function (p) {
+      return p.alive && p.id !== pres && !(meta.noInvestigated && p.investigated);
+    }).map(function (p) {
+      return '<button class="' + (meta.danger ? 'btn danger' : 'btn') + '" data-action="' + meta.act + '" data-arg="' + p.id + '">' + esc(p.name) + '</button>';
+    }).join('');
+
+    return ['<div class="panel">', '<h2>' + esc(meta.label) + '</h2>', '<p class="muted">' + esc(meta.help) + '</p>', tip(power === 'radicalisation' ? 'A converted player switches sides for the rest of the game — and will be shown the other Communists at the next Congress (future).' : 'You may lie about anything you learn.'), list, '</div>'].join('');
+  }
+
+  // ---- Game over --------------------------------------------------------
+  function roleName(role) {
+    return role === 'hitler' ? 'Hitler' : (role === 'fascist' ? 'Fascist' : (role === 'communist' ? 'Communist' : 'Liberal'));
+  }
+
+  function renderGameOver() {
+    var win = G.winner; // 'liberal' | 'fascist' | 'communist'
+    var rows = G.players.map(function (p) {
+      return '<div class="kv"><span class="' + (p.alive ? '' : 'muted') + '">' + esc(p.name) + (p.alive ? '' : ' (executed)') +
+        (p.converted ? ' <span class="tag">radicalised</span>' : '') + '</span><span class="' +
+        (p.role === 'liberal' ? '' : 'tag') + '">' + roleName(p.role) + '</span></div>';
+    }).join('');
+    var st = loadStats();
+    var winLabel = { liberal: 'LIBERALS WIN', fascist: 'FASCISTS WIN', communist: 'COMMUNISTS WIN' }[win];
+    var winColor = { liberal: '#7db4e6', fascist: '#e0796d', communist: '#e6b074' }[win];
+    var statLine = st.games + ' games · Liberals ' + (st.liberal || 0) + ' · Fascists ' + (st.fascist || 0) + (st.communist ? ' · Communists ' + st.communist : '');
+    return [
+      topbar('Game over', ''),
+      '<div class="banner ' + win + ' pop"><h1 style="margin:0;color:' + winColor + '">' + winLabel + '</h1><p class="muted" style="margin:8px 0 0">' + esc(G.winReason) + '</p></div>',
+      '<div class="panel"><h3>Full role reveal</h3>' + rows + '</div>',
+      '<button class="btn" data-action="recap">View recap &amp; timeline</button>',
+      '<button class="btn primary" data-action="rematch">Rematch (same players)</button>',
+      '<button class="btn" data-action="newgame">New game (new setup)</button>',
+      '<button class="btn ghost" data-action="home">Home</button>',
+      '<p class="small muted center" style="margin-top:10px">' + statLine + '</p>'
+    ].join('');
+  }
+
+  // ===========================================================================
+  // RECAP (post-game timeline)
+  // ===========================================================================
+  function renderRecap() {
+    var keyTypes = /enacted|ELECTED|REJECTED|executed|investigated|Special Election|Policy Peek|chaos|WIN|veto/i;
+    var items = G.log.filter(function (e) { return keyTypes.test(e.text); }).map(function (e) {
+      return '<div class="li">R' + e.round + ' · ' + esc(e.text) + '</div>';
+    }).join('');
+    var libP = G.liberalPolicies, fasP = G.fascistPolicies;
+    var dead = G.players.filter(function (p) { return !p.alive; }).length;
+    return [
+      topbar('Recap', '<button class="iconbtn" data-action="backFromRecap">Back</button>'),
+      '<div class="banner ' + G.winner + '"><h2 style="margin:0">' + (G.winner === 'liberal' ? 'Liberals' : 'Fascists') + ' won</h2><p class="muted" style="margin:6px 0 0">' + esc(G.winReason) + '</p></div>',
+      '<div class="panel tight"><div class="kv"><span>Policies enacted</span><span>' + libP + ' Liberal / ' + fasP + ' Fascist</span></div>' +
+      '<div class="kv"><span>Players executed</span><span>' + dead + '</span></div>' +
+      '<div class="kv"><span>Rounds</span><span>' + G.round + '</span></div></div>',
+      '<div class="panel"><h3>How it unfolded</h3><div class="log-list">' + (items || '<span class="muted">No key events.</span>') + '</div></div>'
+    ].join('');
+  }
+
+  // ---- Log --------------------------------------------------------------
+  function renderLog() {
+    var items = G.log.slice().reverse().map(function (e) {
+      return '<div class="li">R' + e.round + ' · ' + esc(e.text) + '</div>';
+    }).join('');
+    return [
+      topbar('Event log (public)', '<button class="iconbtn" data-action="backToGame">Back</button>'),
+      '<div class="panel"><div class="log-list">' + (items || '<span class="muted">No events yet.</span>') + '</div></div>'
+    ].join('');
+  }
+
+  // ---- shared bits ------------------------------------------------------
+  function topbar(title, right) {
+    return '<div class="topbar"><span class="title">' + esc(title) + '</span><span>' + (right || '') + '</span></div>';
+  }
+  function passScreen(name, instruction, buttonLabel, action) {
+    return [
+      '<div class="panel pass-screen">',
+      '<p class="muted">Pass the device to</p>',
+      '<div class="who">' + esc(name) + '</div>',
+      '<p class="small muted">' + esc(instruction) + '</p>',
+      '<button class="btn primary" data-action="' + action + '">' + buttonLabel + '</button>',
+      '</div>'
+    ].join('');
+  }
+
+  // ===========================================================================
+  // ACTIONS
+  // ===========================================================================
+  function handle(action, arg, node) {
+    // Unlock WebAudio on the first user gesture.
+    try { if (settings.sound && window.SHSound) window.SHSound.resume(); } catch (e) {}
+    switch (action) {
+      // navigation
+      case 'home': view = 'home'; G = null; render(); break;
+      case 'rules': view = 'rules'; render(); break;
+      case 'newgame': draft = null; ui = {}; view = 'setup'; render(); break;
+      case 'resume': G = loadSaved(); ui = {}; view = 'game'; render(); break;
+      case 'menu': if (confirm('Quit this game and return home? Progress is saved and resumable.')) { view = 'home'; render(); } break;
+      case 'viewLog': ui._returnView = 'game'; view = 'log'; render(); break;
+      case 'backToGame': view = 'game'; render(); break;
+      case 'backFromRules': view = (G ? 'game' : 'home'); render(); break;
+      case 'openSettings': view = 'settings'; render(); break;
+      case 'backFromSettings': view = G ? 'game' : 'home'; render(); break;
+      case 'toggleSetting': settings[arg] = !settings[arg]; saveSettings(); if (arg === 'sound' && settings.sound) { try { window.SHSound.resume(); } catch (e) {} sfx('tap'); } render(); break;
+      case 'applyPreset': applyPreset(arg); sfx('tap'); render(); break;
+      case 'recap': view = 'recap'; render(); break;
+      case 'backFromRecap': view = 'game'; render(); break;
+
+      // setup
+      case 'toggleAdvanced': ui.advanced = !ui.advanced; render(); break;
+      case 'resetDefaults': { var pc = draft.playerCount; var names = draft.playerNames.slice(); draft = SH.defaultConfig(pc, names); render(); break; }
+      case 'toggleCommunists': {
+        if ((draft.roles.communists || 0) > 0) {
+          draft.roles.liberals += draft.roles.communists;
+          draft.roles.communists = 0;
+          draft.deck.communist = 0;
+        } else {
+          draft = SH.enableCommunists(draft);
+        }
+        render(); break;
+      }
+      case 'startGame': startGame(); break;
+
+      // reveal
+      case 'revealStart': ui.revealIntro = false; render(); break;
+      case 'revealShow': ui.revealShown = true; sfx('reveal'); render(); break;
+      case 'revealNext': ui.revealIdx++; ui.revealShown = false; render(); break;
+      case 'beginPlay': SH.beginPlay(G); save(); ui = {}; render(); break;
+
+      // generic gate
+      case 'ungate': ui.gate = false; sfx('pass'); render(); break;
+
+      // nomination
+      case 'nominate': SH.nominate(G, arg); sfx('tap'); save(); render(); break;
+
+      // voting — secret (pass-and-play)
+      case 'voteReveal': ui.voterGate = false; sfx('pass'); render(); break;
+      case 'vote': { var ha = SH.alivePlayers(G).filter(function (p) { return !p.isBot; }); SH.castVote(G, ha[ui.voteIdx].id, arg); sfx(arg === 'ja' ? 'ja' : 'nein'); ui.voteIdx++; ui.voterGate = true; render(); break; }
+      case 'resolveVotes': SH.resolveVotes(G); soundAfterVote(); save(); render(); break;
+      // voting — table (IRL)
+      case 'quickResult': SH.resolveElectionManual(G, arg === 'pass'); soundAfterVote(); save(); render(); break;
+      case 'jaInc': ui.jaCount = Math.min(SH.aliveCount(G), (ui.jaCount || 0) + 1); render(); break;
+      case 'jaDec': ui.jaCount = Math.max(0, (ui.jaCount || 0) - 1); render(); break;
+      case 'quickCount': SH.resolveElectionManual(G, null, ui.jaCount || 0); soundAfterVote(); save(); render(); break;
+      // voting — open (one shared screen)
+      case 'openSet': { var parts = arg.split(':'); if (!ui.openVotes) ui.openVotes = {}; ui.openVotes[parts[0]] = parts[1]; render(); break; }
+      case 'openSubmit': {
+        var ha = SH.alivePlayers(G).filter(function (p) { return !p.isBot; });
+        ha.forEach(function (p) { SH.castVote(G, p.id, ui.openVotes[p.id]); });
+        ui.voteIdx = ha.length; // jump to the shared tally screen (bots already voted)
+        render(); break;
+      }
+
+      // legislative
+      case 'presDiscard': SH.presidentDiscard(G, parseInt(arg, 10)); sfx('tap'); save(); render(); break;
+      case 'chancEnact': {
+        var col = G.chancellorPolicies[parseInt(arg, 10)];
+        SH.chancellorEnact(G, parseInt(arg, 10));
+        sfx(col === 'L' ? 'policyLib' : 'policyFas');
+        if (G.phase === 'power') sfx('power');
+        save(); render(); break;
+      }
+      case 'requestVeto': SH.chancellorRequestVeto(G); save(); render(); break;
+      case 'consentVeto': SH.presidentConsentVeto(G, arg === '1'); soundAfterVote(); save(); render(); break;
+
+      // powers
+      case 'doInvestigate': {
+        var party = SH.powerInvestigate(G, arg);
+        sfx('power');
+        ui.powerResult = { title: 'Investigation result', body: '<div class="rolecard ' + (party === 'Liberal' ? 'liberal' : 'fascist') + ' flip"><div class="muted">' + esc(nameOf(arg)) + ' is a</div><div class="big">' + party.toUpperCase() + '</div></div><p class="small muted">You may tell the table the truth — or lie.</p>' };
+        save(); render(); break;
+      }
+      case 'doSpecial': SH.powerSpecialElection(G, arg); sfx('power'); save(); render(); break;
+      case 'doExecute':
+        if (ui.confirm !== arg) { ui.confirm = arg; alertConfirm(arg); break; }
+        SH.powerExecution(G, arg); ui.confirm = null; save(); render(); break;
+      case 'doPeek': {
+        var top = SH.powerPolicyPeek(G);
+        sfx('power');
+        var tiles = top.map(function (c) { return '<div class="tile ' + c + '">' + policyName(c).toUpperCase() + '</div>'; }).join('');
+        ui.powerResult = { title: 'Top 3 policies', body: '<div class="tiles">' + tiles + '</div><p class="small muted">Next to be drawn, top to bottom. You may lie about this.</p>' };
+        save(); render(); break;
+      }
+      case 'powerDone': ui.powerResult = null; save(); render(); break;
+
+      // communist (XL) powers
+      case 'doBugging': {
+        var bparty = SH.powerBugging(G, arg);
+        sfx('power');
+        ui.powerResult = { title: 'Bugging result', body: '<div class="rolecard ' + partyClass(bparty) + ' flip"><div class="muted">' + esc(nameOf(arg)) + ' is a</div><div class="big">' + bparty.toUpperCase() + '</div></div><p class="small muted">Only you saw this. Truth or lie — your call.</p>' };
+        save(); render(); break;
+      }
+      case 'doRadicalise': {
+        var success = SH.powerRadicalise(G, arg);
+        sfx('power');
+        ui.conversionReveal = { targetId: arg, success: success, gate: true };
+        save(); render(); break;
+      }
+      case 'doConfess': {
+        var cparty = SH.powerConfession(G);
+        sfx('power');
+        ui.powerResult = { title: 'Confession', body: '<div class="rolecard ' + partyClass(cparty) + '"><div class="muted">You publicly revealed yourself as</div><div class="big">' + cparty.toUpperCase() + '</div></div><p class="small muted">The whole table now knows — it is shown on the board.</p>' };
+        save(); render(); break;
+      }
+      case 'doFiveYear': {
+        SH.powerFiveYearPlan(G);
+        sfx('power');
+        ui.powerResult = { title: 'Five-Year Plan', body: '<p class="muted">2 Communist and 1 Liberal policy were shuffled into the deck.</p>' };
+        save(); render(); break;
+      }
+      case 'convReveal': ui.conversionReveal.gate = false; sfx('reveal'); render(); break;
+      case 'convDone': ui.conversionReveal = null; save(); render(); break;
+
+      // end
+      case 'rematch': rematch(); break;
+    }
+  }
+
+  function partyClass(party) { return party === 'Liberal' ? 'liberal' : (party === 'Communist' ? 'communist' : 'fascist'); }
+
+  function alertConfirm(targetId) {
+    if (confirm('Execute ' + nameOf(targetId) + '? This cannot be undone.')) {
+      SH.powerExecution(G, targetId); sfx('execute'); ui.confirm = null; save(); render();
+    } else { ui.confirm = null; }
+  }
+
+  function applyPreset(key) {
+    ui.preset = key;
+    var pc = draft ? draft.playerCount : 7;
+    var names = draft ? draft.playerNames.slice() : null;
+    draft = SH.applyRuleset(SH.defaultConfig(pc, names), key);
+    var feel = (SH.RULESETS[key] || {}).feel || {};
+    if (typeof feel.tips === 'boolean') { settings.tips = feel.tips; saveSettings(); }
+  }
+
+  function startGame() {
+    var v = SH.validateConfig(draft);
+    if (!v.ok) { render(); return; }
+    G = SH.newGame(draft, seed());
+    ui = {};
+    view = 'game';
+    save();
+    render();
+  }
+
+  function rematch() {
+    var cfg = JSON.parse(JSON.stringify(G.config));
+    G = SH.newGame(cfg, seed());
+    ui = {};
+    save();
+    render();
+  }
+
+  // ===========================================================================
+  // INPUT WIRING (delegated)
+  // ===========================================================================
+  app.addEventListener('click', function (e) {
+    // steppers
+    var stepBtn = e.target.closest('.stepper button');
+    if (stepBtn) { onStep(stepBtn); return; }
+    var toggle = e.target.closest('[data-toggle]');
+    if (toggle) { onToggle(toggle.getAttribute('data-toggle')); return; }
+    var act = e.target.closest('[data-action]');
+    if (act) { handle(act.getAttribute('data-action'), act.getAttribute('data-arg'), act); return; }
+  });
+
+  // text name inputs (no re-render to keep focus; patch draft + validation panel)
+  app.addEventListener('input', function (e) {
+    var t = e.target;
+    if (t.hasAttribute && t.hasAttribute('data-name-idx')) {
+      var i = parseInt(t.getAttribute('data-name-idx'), 10);
+      draft.playerNames[i] = t.value;
+    }
+  });
+  // board power selects
+  app.addEventListener('change', function (e) {
+    var t = e.target;
+    if (t.hasAttribute && t.hasAttribute('data-board-idx')) {
+      var i = parseInt(t.getAttribute('data-board-idx'), 10);
+      draft.board[i] = t.value === 'null' ? null : t.value;
+      render();
+      return;
+    }
+    if (t.hasAttribute && t.hasAttribute('data-cfg-select')) {
+      setPath(draft, t.getAttribute('data-cfg-select'), t.value);
+      render();
+      return;
+    }
+  });
+
+  function getPath(obj, path) { var ks = path.split('.'); for (var i = 0; i < ks.length; i++) obj = obj[ks[i]]; return obj; }
+  function setPath(obj, path, val) { var ks = path.split('.'); for (var i = 0; i < ks.length - 1; i++) obj = obj[ks[i]]; obj[ks[ks.length - 1]] = val; }
+
+  function onStep(btn) {
+    var wrap = btn.closest('.stepper');
+    var path = wrap.getAttribute('data-stepper');
+    var min = parseInt(wrap.getAttribute('data-min'), 10);
+    var max = parseInt(wrap.getAttribute('data-max'), 10);
+    var delta = parseInt(btn.getAttribute('data-step'), 10);
+    var cur = getPath(draft, path);
+    var next = Math.max(min, Math.min(max, cur + delta));
+    setPath(draft, path, next);
+
+    if (path === 'playerCount') {
+      // rebuild from preset for the new count, keep entered names
+      var names = draft.playerNames.slice();
+      draft = SH.defaultConfig(next, names);
+      ui.advanced = ui.advanced; // keep
+    }
+    if (path === 'win.fascist') {
+      SH.reconcileBoard(draft); // resize board to match
+    }
+    if (path === 'roles.communists') {
+      // keep the head-count summing by taking from / giving back to Liberals
+      draft.roles.liberals = Math.max(0, draft.playerCount - draft.roles.fascists - next - 1);
+    }
+    if (path === 'win.communist') {
+      reconcileCommunistBoard(draft);
+    }
+    if (path === 'bots' && next > 0 && draft.votingMode === 'table') {
+      draft.votingMode = 'secret'; // bots can't vote at the table
+    }
+    render();
+  }
+
+  function reconcileCommunistBoard(d) {
+    var n = d.win.communist;
+    var src = d.communistBoard || [];
+    var out = [];
+    for (var i = 0; i < n; i++) {
+      out[i] = (i === n - 1) ? 'win' : (i < src.length && src[i] !== 'win' ? src[i] : (SH.COMMUNIST_BOARD[i] || null));
+    }
+    d.communistBoard = out;
+  }
+
+  function onToggle(path) {
+    setPath(draft, path, !getPath(draft, path));
+    render();
+  }
+
+  // ===========================================================================
+  // RULES SCREEN
+  // ===========================================================================
+  function renderRules() {
+    return [
+      topbar('How to play', '<button class="iconbtn" data-action="backFromRules">Back</button>'),
+      '<div class="panel"><h2>Goal</h2>',
+      '<p class="small"><b>Liberals</b> win by enacting 5 Liberal Policies <i>or</i> assassinating Hitler. <b>Fascists</b> win by enacting 6 Fascist Policies <i>or</i> by getting Hitler elected Chancellor after 3 Fascist Policies are in play.</p></div>',
+      '<div class="panel"><h2>Each round</h2>',
+      '<p class="small">1. The <b>President</b> nominates a <b>Chancellor</b>. Everyone votes Ja/Nein — a strict majority elects them (ties fail).</p>',
+      '<p class="small">2. If elected, the President draws 3 policies, secretly discards 1, and passes 2 to the Chancellor, who enacts 1.</p>',
+      '<p class="small">3. Some Fascist policies grant the President a one-time power: investigate, special election, policy peek, or execution.</p>',
+      '<p class="small">3 failed elections in a row = chaos: the top policy is enacted automatically.</p></div>',
+      '<div class="panel"><h2>Lying</h2><p class="small">You may lie about anything hidden (your role, policies you drew, investigation results) — except a player who is Hitler must admit it if assassinated or elected Chancellor after the 3rd Fascist policy.</p></div>',
+      '<div class="panel"><h2>This app</h2><p class="small">Pass the device when prompted so each player sees their secret info privately. The app tracks the board, deck, powers, term limits, and win conditions automatically.</p></div>',
+      '<button class="btn primary" data-action="backFromRules">Got it</button>'
+    ].join('');
+  }
+
+  // ===========================================================================
+  // BOOT
+  // ===========================================================================
+  function boot() {
+    loadSettings();
+    try { if (window.SHSound) window.SHSound.setEnabled(settings.sound); } catch (e) {}
+    render();
+  }
+
+  // Test hook: lets the headless smoke test drive UI actions directly, bypassing
+  // the DOM event layer. No effect in the browser beyond exposing window.__SHUI.
+  var hook = {
+    handle: handle,
+    render: render,
+    state: function () { return { view: view, G: G, draft: draft, ui: ui }; },
+    setView: function (v) { view = v; },
+    setDraft: function (d) { draft = d; },
+    botStep: function () { return botStep(); },
+    botCanAct: function () { return botCanAct(); }
+  };
+  try { window.__SHUI = hook; } catch (e) {}
+  if (typeof module !== 'undefined' && module.exports) module.exports = hook;
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
+  else boot();
+})();
+
+  </script>
+</body>
+</html>

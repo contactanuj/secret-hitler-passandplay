@@ -1,0 +1,40 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    name: Test & verify build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Use Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests (engine + UI smoke)
+        run: npm test
+
+      - name: Regenerate app.html
+        run: npm run build:html
+
+      - name: Ensure committed app.html is up to date
+        run: |
+          if ! git diff --quiet -- assets/app.html; then
+            echo "::error::assets/app.html is out of date. Run 'npm run build:html' and commit the result."
+            git --no-pager diff -- assets/app.html
+            exit 1
+          fi
+
+      - name: Regenerate icon (sanity)
+        run: npm run icon

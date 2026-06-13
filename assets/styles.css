@@ -1,0 +1,193 @@
+/* styles.css — Secret Hitler pass-and-play. Dark, warm 1930s palette. */
+:root {
+  --bg: #0f0d0b;
+  --panel: #1b1713;
+  --panel2: #241e18;
+  --line: #3a2f25;
+  --text: #ece4d6;
+  --muted: #9a8f7e;
+  --lib: #2f6fb0;
+  --lib-dim: #1d3a5c;
+  --fas: #c0392b;
+  --comm: #cf8a3c;
+  --gold: #c8a24a;
+  --ok: #4a8f5b;
+  --danger: #c0392b;
+}
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html, body { margin: 0; height: 100%; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font-size: 16px;
+  line-height: 1.4;
+  -webkit-user-select: none; user-select: none;
+}
+#app { max-width: 560px; margin: 0 auto; padding: 16px 16px 40px; min-height: 100%; }
+
+h1, h2, h3 { margin: 0 0 10px; font-weight: 700; letter-spacing: 0.2px; }
+h1 { font-size: 28px; color: var(--gold); }
+h2 { font-size: 21px; }
+h3 { font-size: 16px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; font-weight: 600; }
+p { margin: 0 0 10px; }
+.muted { color: var(--muted); }
+.center { text-align: center; }
+.small { font-size: 13px; }
+.spacer { height: 14px; }
+
+.panel { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 16px; margin-bottom: 14px; }
+.panel.tight { padding: 12px; }
+
+.btn {
+  display: block; width: 100%; padding: 15px 16px; margin: 8px 0;
+  border: 1px solid var(--line); border-radius: 12px;
+  background: var(--panel2); color: var(--text);
+  font-size: 17px; font-weight: 600; text-align: center; cursor: pointer;
+}
+.btn:active { transform: translateY(1px); }
+.btn.primary { background: var(--gold); color: #1a1510; border-color: var(--gold); }
+.btn.lib { background: var(--lib); border-color: var(--lib); color: #fff; }
+.btn.fas { background: var(--fas); border-color: var(--fas); color: #fff; }
+.btn.danger { background: var(--danger); border-color: var(--danger); color: #fff; }
+.btn.ghost { background: transparent; }
+.btn:disabled { opacity: 0.4; cursor: default; }
+.btn.sm { padding: 10px 12px; font-size: 15px; width: auto; display: inline-block; margin: 4px; }
+
+.row { display: flex; gap: 10px; align-items: center; }
+.row.wrap { flex-wrap: wrap; }
+.grow { flex: 1; }
+
+label { display: block; font-size: 13px; color: var(--muted); margin: 10px 0 4px; }
+input[type=text], input[type=number] {
+  width: 100%; padding: 12px; border-radius: 10px;
+  border: 1px solid var(--line); background: #0c0a08; color: var(--text); font-size: 16px;
+}
+select {
+  width: 100%; padding: 11px; border-radius: 10px;
+  border: 1px solid var(--line); background: #0c0a08; color: var(--text); font-size: 15px;
+}
+
+/* number stepper */
+.stepper { display: flex; align-items: center; gap: 0; }
+.stepper button {
+  width: 46px; height: 46px; font-size: 22px; font-weight: 700;
+  background: var(--panel2); color: var(--text); border: 1px solid var(--line); cursor: pointer;
+}
+.stepper button:first-child { border-radius: 10px 0 0 10px; }
+.stepper button:last-child { border-radius: 0 10px 10px 0; }
+.stepper .val { min-width: 56px; text-align: center; font-size: 19px; font-weight: 700;
+  border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); height: 46px; line-height: 46px; background: #0c0a08; }
+
+/* tracks */
+.track { display: flex; gap: 4px; margin: 6px 0; }
+.slot {
+  flex: 1; aspect-ratio: 1 / 1; border-radius: 6px; border: 1px solid var(--line);
+  display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700;
+  text-align: center; color: var(--muted); position: relative; min-height: 34px;
+}
+.slot.lib { background: #14283d; border-color: var(--lib); }
+.slot.lib.filled { background: var(--lib); color: #fff; }
+.slot.fas { background: #2e1512; border-color: var(--fas); }
+.slot.fas.filled { background: var(--fas); color: #fff; }
+.slot .pw { font-size: 9px; line-height: 1.1; padding: 2px; }
+
+.tracker-dots { display: flex; gap: 8px; align-items: center; }
+.dot { width: 16px; height: 16px; border-radius: 50%; border: 2px solid var(--line); }
+.dot.on { background: var(--gold); border-color: var(--gold); }
+
+/* policy tiles */
+.tiles { display: flex; gap: 10px; justify-content: center; margin: 14px 0; }
+.tile {
+  flex: 1; max-width: 130px; aspect-ratio: 2 / 3; border-radius: 12px;
+  display: flex; align-items: center; justify-content: center; flex-direction: column;
+  font-weight: 800; font-size: 15px; letter-spacing: 1px; cursor: pointer; border: 3px solid transparent;
+}
+.tile.L { background: var(--lib); color: #fff; }
+.tile.F { background: var(--fas); color: #fff; }
+.tile.pick:active { border-color: var(--gold); }
+
+/* player list */
+.players { display: flex; flex-direction: column; gap: 6px; }
+.pl { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 10px; background: var(--panel2); border: 1px solid var(--line); }
+.pl.dead { opacity: 0.45; text-decoration: line-through; }
+.pl .badge { font-size: 11px; padding: 2px 7px; border-radius: 20px; border: 1px solid var(--line); color: var(--muted); }
+.pl .badge.pres { background: var(--gold); color: #1a1510; border-color: var(--gold); }
+.pl .badge.chanc { background: #463a1c; color: var(--gold); }
+
+.tag { display: inline-block; font-size: 11px; padding: 2px 8px; border-radius: 20px; border: 1px solid var(--line); color: var(--muted); margin-right: 6px; }
+
+/* role card */
+.rolecard { border-radius: 16px; padding: 26px 18px; text-align: center; margin: 10px 0; border: 2px solid; }
+.rolecard.liberal { background: #14283d; border-color: var(--lib); }
+.rolecard.fascist { background: #2e1512; border-color: var(--fas); }
+.rolecard.hitler  { background: #2a0f0c; border-color: var(--gold); }
+.rolecard .big { font-size: 32px; font-weight: 800; margin: 6px 0; }
+.rolecard.liberal .big { color: #7db4e6; }
+.rolecard.fascist .big { color: #e0796d; }
+.rolecard.hitler .big { color: var(--gold); }
+
+.banner { text-align: center; padding: 22px; border-radius: 16px; margin-bottom: 14px; border: 2px solid; }
+.banner.liberal { background: #14283d; border-color: var(--lib); }
+.banner.fascist { background: #2e1512; border-color: var(--fas); }
+
+.note { border-left: 3px solid var(--gold); padding: 8px 12px; background: var(--panel2); border-radius: 8px; margin: 8px 0; font-size: 14px; }
+.err { border-left: 3px solid var(--danger); padding: 7px 12px; background: #2a1310; border-radius: 8px; margin: 6px 0; font-size: 14px; color: #f0b8b0; }
+.warn { border-left: 3px solid var(--gold); padding: 7px 12px; background: #2a2410; border-radius: 8px; margin: 6px 0; font-size: 14px; color: #e6d39a; }
+
+.topbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+.topbar .title { font-size: 13px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
+.iconbtn { background: var(--panel2); border: 1px solid var(--line); color: var(--text); border-radius: 10px; padding: 8px 12px; font-size: 14px; cursor: pointer; }
+
+.pass-screen { text-align: center; padding: 30px 10px; }
+.pass-screen .who { font-size: 30px; font-weight: 800; color: var(--gold); margin: 10px 0; }
+
+.log-list { font-size: 13px; color: var(--muted); }
+.log-list .li { padding: 5px 0; border-bottom: 1px solid var(--line); }
+
+.collapse-h { display: flex; align-items: center; justify-content: space-between; cursor: pointer; }
+.kv { display: flex; justify-content: space-between; gap: 10px; padding: 6px 0; border-bottom: 1px solid var(--line); }
+.kv:last-child { border-bottom: none; }
+.hidden { display: none; }
+
+/* rule-set chips */
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip { padding: 9px 15px; border-radius: 22px; border: 1px solid var(--line); background: var(--panel2); color: var(--text); font-size: 14px; font-weight: 600; cursor: pointer; }
+.chip.on { background: var(--gold); color: #1a1510; border-color: var(--gold); }
+
+/* home hero */
+.hero .emblem { line-height: 0; margin-bottom: 10px; }
+.hero .emblem svg { display: block; margin: 0 auto; }
+.hero h1 { letter-spacing: 3px; }
+
+/* inline svg icons + typographic tags (replacing emoji) */
+.iconbtn .ic { vertical-align: -3px; }
+.tiptag, .vtag { display: inline-block; font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; border-radius: 4px; padding: 1px 6px; margin-right: 6px; }
+.tiptag { color: #1a1510; background: var(--gold); }
+.warn-tag { color: #1a1510; background: var(--gold); }
+.err-tag { color: #fff; background: var(--danger); }
+.danger-text { color: #e6a07a; font-weight: 700; }
+
+/* atmosphere / motion */
+@keyframes rise { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+@keyframes flipIn { 0% { transform: perspective(600px) rotateX(80deg); opacity: 0; } 100% { transform: perspective(600px) rotateX(0); opacity: 1; } }
+@keyframes pop { 0% { transform: scale(.82); opacity: 0; } 60% { transform: scale(1.04); } 100% { transform: scale(1); opacity: 1; } }
+@keyframes slamIn { 0% { transform: translateY(-14px) scale(1.1); opacity: 0; } 100% { transform: none; opacity: 1; } }
+
+.rolecard.flip { animation: flipIn .45s ease-out; transform-origin: top center; }
+.banner.pop { animation: pop .45s cubic-bezier(.2,.8,.3,1.2); }
+.tile { animation: rise .25s ease-out; }
+.tiles .tile:nth-child(2) { animation-delay: .05s; }
+.tiles .tile:nth-child(3) { animation-delay: .1s; }
+.pass-screen .who { animation: slamIn .3s ease-out; }
+
+/* Communist (XL) faction */
+.slot.comm { background: #2e2310; border-color: var(--comm); }
+.slot.comm.filled { background: var(--comm); color: #1a1206; }
+.rolecard.communist { background: #2a1f0c; border-color: var(--comm); }
+.rolecard.communist .big { color: #e6b074; }
+.banner.communist { background: #2a1f0c; border-color: var(--comm); }
+.badge.party-liberal { background: var(--lib); color: #fff; border-color: var(--lib); }
+.badge.party-fascist { background: var(--fas); color: #fff; border-color: var(--fas); }
+.badge.party-communist { background: var(--comm); color: #1a1206; border-color: var(--comm); }
+.badge.ai { background: #26303a; color: #9fb6c8; border-color: #3a4654; }

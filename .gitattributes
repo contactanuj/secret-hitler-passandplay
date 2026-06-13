@@ -1,0 +1,13 @@
+# Normalize line endings to LF in the repo; let Git handle checkout per-OS.
+* text=auto eol=lf
+
+# Generated, but committed so the Expo WebView can bundle it.
+assets/app.html linguist-generated=true
+
+# Binary files — never diff or normalize.
+*.png  binary
+*.jpg  binary
+*.jpeg binary
+*.ico  binary
+*.jks  binary
+*.keystore binary

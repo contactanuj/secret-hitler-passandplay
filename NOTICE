@@ -1,0 +1,30 @@
+NOTICE — Attribution for "Secret Hitler — Pass & Play"
+=======================================================
+
+This project is an UNOFFICIAL, fan-made adaptation and is not affiliated with or
+endorsed by the creators of Secret Hitler.
+
+ORIGINAL WORK
+-------------
+  Secret Hitler
+  Created by Mike Boxleiter, Tommy Maranges, and Mac Schubert.
+  Licensed under Creative Commons Attribution-NonCommercial-ShareAlike 4.0
+  International (CC BY-NC-SA 4.0).
+  https://www.secrethitler.com/
+
+CHANGES MADE (as required by the "indicate if changes were made" term of CC BY)
+-------------------------------------------------------------------------------
+  This is a digital, single-device "pass-and-play" adaptation. It implements the
+  official ruleset and additionally provides:
+    • A configurable rules engine (player counts, deck, board powers, thresholds,
+      voting modes) with validation.
+    • The Communist / "Secret Hitler XL" third-faction variant (opt-in).
+    • AI bots to fill seats.
+    • Original user-interface, original artwork (e.g. the app icon), and original
+      synthesized sound. NO official Secret Hitler artwork is included.
+
+This adaptation is distributed under the SAME license as the original work,
+CC BY-NC-SA 4.0. See the LICENSE file.
+
+Per the Secret Hitler license terms, this work may NOT be used commercially, and
+may NOT be submitted to any app store without the original creators' approval.
