@@ -36,10 +36,10 @@
     "build:android": "npm run build:html && npx eas-cli build -p android --profile preview"
   },
   "dependencies": {
-    "expo": "~51.0.28",
-    "expo-asset": "~10.0.10",
-    "expo-file-system": "~17.0.1",
-    "expo-status-bar": "~1.12.1",
+    "expo": "~56.0.11",
+    "expo-asset": "~56.0.17",
+    "expo-file-system": "~56.0.8",
+    "expo-status-bar": "~56.0.4",
     "react": "18.2.0",
     "react-native": "0.74.5",
     "react-native-webview": "13.8.6"
