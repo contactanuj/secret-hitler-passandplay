@@ -8,9 +8,6 @@
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "dark",
     "backgroundColor": "#0f0d0b",
-    "splash": {
-      "backgroundColor": "#0f0d0b"
-    },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/icon.png",
@@ -27,6 +24,10 @@
       "eas": {
         "projectId": "06664dbd-4f3b-46c9-8163-91cdba476500"
       }
-    }
+    },
+    "plugins": [
+      "expo-asset",
+      "expo-status-bar"
+    ]
   }
 }
