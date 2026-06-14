@@ -2674,10 +2674,11 @@ select {
 
   function onStep(btn) {
     var wrap = btn.closest('.stepper');
-    var path = wrap.getAttribute('data-stepper');
-    var min = parseInt(wrap.getAttribute('data-min'), 10);
-    var max = parseInt(wrap.getAttribute('data-max'), 10);
-    var delta = parseInt(btn.getAttribute('data-step'), 10);
+    applyStep(wrap.getAttribute('data-stepper'), parseInt(btn.getAttribute('data-step'), 10),
+      parseInt(wrap.getAttribute('data-min'), 10), parseInt(wrap.getAttribute('data-max'), 10));
+  }
+
+  function applyStep(path, delta, min, max) {
     var cur = getPath(draft, path);
     var next = Math.max(min, Math.min(max, cur + delta));
     setPath(draft, path, next);
@@ -2755,7 +2756,8 @@ select {
     setView: function (v) { view = v; },
     setDraft: function (d) { draft = d; },
     botStep: function () { return botStep(); },
-    botCanAct: function () { return botCanAct(); }
+    botCanAct: function () { return botCanAct(); },
+    step: function (path, delta, min, max) { return applyStep(path, delta, min, max); }
   };
   try { window.__SHUI = hook; } catch (e) {}
   if (typeof module !== 'undefined' && module.exports) module.exports = hook;

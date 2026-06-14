@@ -275,6 +275,43 @@ ok(SH.validateConfig(UI.state().draft).ok, 'communists-off draft is valid');
     'broken roles auto-normalized to the player count on render');
 })();
 
+// setup STEPPERS (player count / roles / win / deck / bots) driven through the real
+// onStep path (UI.step). Closes the gap where stepper logic was never tested.
+(function () {
+  function dr() { return UI.state().draft; }
+  function rsum(x) { return x.roles.liberals + x.roles.fascists + (x.roles.communists || 0) + 1; }
+  function inv(label) {
+    var x = dr();
+    ok(rsum(x) === x.playerCount, label + ': roles sum to player count');
+    ok(x.roles.liberals >= 1 && x.roles.fascists >= 1, label + ': lib/fasc >= 1');
+    ok(x.board.length === x.win.fascist, label + ': fascist board matches win');
+    ok((x.bots || 0) <= x.playerCount - 1, label + ': bots fit');
+  }
+  UI.handle('newgame'); UI.handle('toggleAdvanced');
+  // player count changes the total (the reported "stuck at 7/7" symptom must NOT happen)
+  UI.step('playerCount', -1, 5, 10); UI.step('playerCount', -1, 5, 10);
+  ok(dr().playerCount === 5 && rsum(dr()) === 5, 'player count 7->5 updates total to 5/5');
+  inv('pc=5');
+  // reducing the Liberal ("villager") role by adding Fascists
+  var before = dr().roles.liberals;
+  UI.step('roles.fascists', 1, 1, dr().playerCount - 2);
+  ok(dr().roles.liberals === before - 1, 'adding a Fascist reduces the Liberal role');
+  inv('after fascist+');
+  // win.fascist resizes the board; deck-zero is blocked not crashing; bots clamp on shrink
+  UI.setDraft(SH.defaultConfig(7)); UI.render();
+  UI.step('win.fascist', -3, 1, 20); inv('win.fascist down'); UI.step('win.fascist', 5, 1, 20); inv('win.fascist up');
+  UI.setDraft(SH.defaultConfig(10)); UI.render();
+  for (var b = 0; b < 9; b++) UI.step('bots', 1, 0, dr().playerCount - 1);
+  UI.step('playerCount', -5, 5, 10);
+  ok(dr().bots <= dr().playerCount - 1, 'bots clamp when player count shrinks');
+  inv('after shrink with bots');
+  // Communist XL toggle + steppers stay valid
+  UI.setDraft(SH.defaultConfig(9)); UI.render(); UI.handle('toggleCommunists');
+  UI.step('roles.communists', 1, 1, dr().playerCount - dr().roles.fascists - 2);
+  UI.step('win.communist', 2, 1, 12);
+  ok(SH.validateConfig(dr()).ok, 'XL with stepped communists/win stays valid'); inv('XL stepped');
+})();
+
 // in-game menu + safe re-check role flow (gated, timed, bots excluded)
 (function () {
   var d = SH.defaultConfig(6); d.bots = 2; d.votingMode = 'secret';
