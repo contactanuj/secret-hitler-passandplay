@@ -1,5 +1,5 @@
 /*
- * engine.test.js — exercises sh-engine.js with no external dependencies.
+ * engine.test.js - exercises sh-engine.js with no external dependencies.
  *
  * Run: node tests/engine.test.js   (or: npm test)
  *
@@ -235,7 +235,7 @@ function electUnanimous(s, chancellorId) {
   ok(s.phase === 'nomination', 'after veto the game moves to the next round');
 })();
 
-// A refused veto cannot be re-proposed (prevents the veto loop — ref issue #10).
+// A refused veto cannot be re-proposed (prevents the veto loop - ref issue #10).
 (function () {
   var s = SH.newGame(SH.defaultConfig(5), 123);
   s.fascistPolicies = 5; s.vetoUnlocked = true;

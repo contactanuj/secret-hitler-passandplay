@@ -1,10 +1,10 @@
 /*
- * ui.smoke.test.js — headless smoke test for ui.js.
+ * ui.smoke.test.js - headless smoke test for ui.js.
  *
  * Stubs a minimal DOM, loads the real engine + UI, and drives complete games
  * through the actual UI action handlers (not the engine directly). This catches
  * UI<->engine wiring bugs: wrong action names, arg parsing, gating/handoff logic,
- * and the post-power private-result screen — none of which the engine test sees.
+ * and the post-power private-result screen - none of which the engine test sees.
  *
  * Run: node tests/ui.smoke.test.js
  */
@@ -108,7 +108,7 @@ function playUI(pc, mode, revealVotes, communist) {
     var st = UI.state(); var G = st.G; var u = st.ui;
     if (G.phase === 'game_over') break;
     if (guard++ > 8000) { ok(false, label + ' UI loop guard tripped'); break; }
-    // private overlays exist regardless of engine phase — dismiss them faithfully
+    // private overlays exist regardless of engine phase - dismiss them faithfully
     if (u.powerResult) { sawPowerResult = true; UI.handle('powerDone'); expectRendered(label + ' powerResult'); continue; }
     if (u.conversionReveal) { sawConversion = true; UI.handle(u.conversionReveal.gate ? 'convReveal' : 'convDone'); expectRendered(label + ' conversion'); continue; }
     switch (G.phase) {

@@ -10,7 +10,7 @@ This is an **offline, single-device** game app. It has:
   WebView's `localStorage`).
 
 The realistic attack surface is therefore small. The most relevant "security-like"
-concerns are **information-leak bugs** specific to a hidden-role game — e.g. a UI
+concerns are **information-leak bugs** specific to a hidden-role game - e.g. a UI
 that reveals a secret role on a shared screen. We treat those as high-priority
 defects (see below).
 
@@ -34,7 +34,7 @@ issues in a timely manner.
 
 If you find a case where the app reveals secret information it shouldn't (a role, a
 drawn policy, an investigation/bugging result, a vote before reveal, a radicalised
-player's new allegiance) on a screen visible to other players, please report it —
+player's new allegiance) on a screen visible to other players, please report it -
 these directly affect game integrity and are prioritized like security bugs.
 
 ## Keystores & secrets

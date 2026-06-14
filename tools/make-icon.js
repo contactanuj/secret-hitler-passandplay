@@ -1,5 +1,5 @@
 /*
- * make-icon.js — generates assets/icon.png (1024x1024) with NO dependencies.
+ * make-icon.js - generates assets/icon.png (1024x1024) with NO dependencies.
  *
  * Design: a gold "watchful eye" emblem (secrecy / deduction) inside a thin ring,
  * on the app's warm-dark brand background with a soft vignette. Clean, professional,

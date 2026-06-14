@@ -8,7 +8,7 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
-- **Core game**: full official Secret Hitler ruleset for 5–10 players — elections,
+- **Core game**: full official Secret Hitler ruleset for 5-10 players - elections,
   term limits (incl. the 5-player exception), legislative session, the election
   tracker / chaos, all executive powers (Investigate, Special Election, Policy Peek,
   Execution), veto power, and all win conditions (policy tracks, Hitler elected
@@ -17,7 +17,7 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   serializable, fully headless-unit-tested.
 - **Configurability with validation**: player count, role split, deck composition,
   win thresholds, board powers, election-tracker length, veto unlock, and
-  Hitler-as-Chancellor threshold — illegal/unwinnable setups are blocked, off-spec
+  Hitler-as-Chancellor threshold - illegal/unwinnable setups are blocked, off-spec
   ones warned.
 - **Voting modes**: table (vote IRL, app records the result), open, and secret
   pass-and-play; optional anonymous (house-rule) voting.

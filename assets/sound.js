@@ -1,5 +1,5 @@
 /*
- * sound.js — tiny synthesized SFX (WebAudio, no asset files). Optional/toggleable.
+ * sound.js - tiny synthesized SFX (WebAudio, no asset files). Optional/toggleable.
  * Safely no-ops where WebAudio is unavailable (e.g. the headless Node smoke test).
  * Exposes window.SHSound.
  */

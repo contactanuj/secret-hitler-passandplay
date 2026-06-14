@@ -1,5 +1,5 @@
 /*
- * sh-engine.js — Secret Hitler rules engine (pure, transport-agnostic).
+ * sh-engine.js - Secret Hitler rules engine (pure, transport-agnostic).
  *
  * No DOM, no network. Deterministic given a seed, so it can be:
  *   - unit-tested in Node by simulating full games (tests/engine.test.js),
@@ -69,7 +69,7 @@
   var RULESETS = {
     official: { name: 'Official', desc: 'Standard rules, balanced for your player count.', cfg: {}, feel: { tips: false } },
     beginner: { name: 'Beginner', desc: 'Table voting + extra on-screen guidance for new groups.', cfg: { votingMode: 'table', revealVotes: true }, feel: { tips: true } },
-    fast: { name: 'Fast', desc: 'Chaos after 2 failed elections — quicker, wilder games.', cfg: { electionTrackerMax: 2 }, feel: { tips: false } },
+    fast: { name: 'Fast', desc: 'Chaos after 2 failed elections - quicker, wilder games.', cfg: { electionTrackerMax: 2 }, feel: { tips: false } },
     tense: { name: 'Tense', desc: 'Secret on-device voting for maximum paranoia.', cfg: { votingMode: 'secret', revealVotes: true }, feel: { tips: false } }
   };
 
@@ -83,7 +83,7 @@
   }
 
   // ---------------------------------------------------------------------------
-  // Seeded PRNG (mulberry32) — deterministic + JSON-serializable via state.rngState.
+  // Seeded PRNG (mulberry32) - deterministic + JSON-serializable via state.rngState.
   // ---------------------------------------------------------------------------
 
   function nextRand(state) {
@@ -136,9 +136,9 @@
       hitlerChancellorThreshold: 3,
       vetoUnlockAt: 5,
       // How the public election vote is taken:
-      //   'table'  — group votes IRL with hands/cards; app records only Passed/Failed
-      //   'open'   — app records each player's Ja/Nein openly on one shared screen
-      //   'secret' — pass-and-play: each player votes privately, revealed together
+      //   'table'  - group votes IRL with hands/cards; app records only Passed/Failed
+      //   'open'   - app records each player's Ja/Nein openly on one shared screen
+      //   'secret' - pass-and-play: each player votes privately, revealed together
       votingMode: 'table',
       // Votes are public per the official rules. false = anonymous house-rule.
       revealVotes: true,
@@ -180,7 +180,7 @@
   //   liberals + fascists + communists + 1 (Hitler) === playerCount,
   // with liberals >= 1 and fascists >= 1. Fascists/Communists are trimmed if they'd
   // leave no room for a Liberal + the single Hitler. Liberals auto-fill the remainder.
-  // Idempotent — safe to call on every render so an against-the-count config is
+  // Idempotent - safe to call on every render so an against-the-count config is
   // simply unreachable.
   function normalizeRoles(config) {
     var pc = config.playerCount, r = config.roles;
@@ -253,7 +253,7 @@
       var nm = (names[i] || '').trim();
       if (!nm) { errors.push('Every player needs a name (player ' + (i + 1) + ' is blank).'); continue; }
       var key = nm.toLowerCase();
-      if (seen[key]) warnings.push('Duplicate name "' + nm + '" — players may be hard to tell apart.');
+      if (seen[key]) warnings.push('Duplicate name "' + nm + '" - players may be hard to tell apart.');
       seen[key] = true;
     }
 
@@ -264,11 +264,11 @@
       errors.push('Deck policy counts must be non-negative numbers.');
     } else {
       if (dl + df + dc < 3) errors.push('The policy deck needs at least 3 tiles (the President draws 3).');
-      if (df < 1) warnings.push('No Fascist policies in the deck — Fascists can only win by electing Hitler.');
-      if (dl < 1) warnings.push('No Liberal policies in the deck — Liberals can only win by killing Hitler.');
+      if (df < 1) warnings.push('No Fascist policies in the deck - Fascists can only win by electing Hitler.');
+      if (dl < 1) warnings.push('No Liberal policies in the deck - Liberals can only win by killing Hitler.');
     }
 
-    // Win thresholds vs deck — these are warnings, not errors: an unreachable
+    // Win thresholds vs deck - these are warnings, not errors: an unreachable
     // policy track still leaves the Hitler win/lose paths, so the game is playable.
     var wl = c.win && c.win.liberal, wf = c.win && c.win.fascist;
     if (!(wl >= 1) || !(wf >= 1)) {
@@ -276,11 +276,11 @@
     } else {
       if (dl >= 0 && dl < wl) {
         warnings.push('Only ' + dl + ' Liberal tiles but ' + wl +
-          ' needed to win — Liberals cannot win on policies (only by killing Hitler).');
+          ' needed to win - Liberals cannot win on policies (only by killing Hitler).');
       }
       if (df >= 0 && df < wf) {
         warnings.push('Only ' + df + ' Fascist tiles but ' + wf +
-          ' needed to win — Fascists cannot win on policies (only by electing Hitler).');
+          ' needed to win - Fascists cannot win on policies (only by electing Hitler).');
       }
     }
 
@@ -306,18 +306,18 @@
     if (c.hitlerChancellorThreshold < 0) errors.push('Hitler-Chancellor threshold cannot be negative.');
     if (wf >= 1 && c.hitlerChancellorThreshold > wf) {
       warnings.push('Hitler-as-Chancellor only becomes a loss after ' + c.hitlerChancellorThreshold +
-        ' Fascist policies, but the game ends at ' + wf + ' — that win condition can never trigger.');
+        ' Fascist policies, but the game ends at ' + wf + ' - that win condition can never trigger.');
     }
     if (!(c.vetoUnlockAt >= 1)) {
       errors.push('Veto unlock threshold must be at least 1.');
     } else if (wf >= 1 && c.vetoUnlockAt > wf) {
       warnings.push('Veto unlocks at ' + c.vetoUnlockAt + ' Fascist policies, but the game ends at ' +
-        wf + ' — veto will never become available.');
+        wf + ' - veto will never become available.');
     }
 
     // Off-spec player counts: supported, but balance is not guaranteed.
     if (!PRESETS[pc] && pc >= 2) {
-      warnings.push('Player count ' + pc + ' is outside the official 5-10 range — playable, but balance is untested.');
+      warnings.push('Player count ' + pc + ' is outside the official 5-10 range - playable, but balance is untested.');
     }
 
     // Bots must fit within the player count.
@@ -325,12 +325,12 @@
     if (bots < 0 || bots > pc) {
       errors.push('Bots (' + bots + ') must be between 0 and the player count (' + pc + ').');
     } else if (bots === pc) {
-      warnings.push('All seats are bots — useful as a demo, but no one is playing.');
+      warnings.push('All seats are bots - useful as a demo, but no one is playing.');
     }
 
     // Communist (Secret Hitler XL) expansion checks.
     if (comm > 0) {
-      warnings.push('The Communist (Secret Hitler XL) faction is enabled — a fun but experimental variant whose balance is not officially tuned.');
+      warnings.push('The Communist (Secret Hitler XL) faction is enabled - a fun but experimental variant whose balance is not officially tuned.');
       var wc = c.win && c.win.communist;
       if (!(wc >= 1)) {
         errors.push('Communist win threshold must be at least 1.');
@@ -338,7 +338,7 @@
         if ((c.communistBoard || []).length !== wc) {
           errors.push('The Communist board has ' + (c.communistBoard || []).length + ' slot(s) but the Communist win threshold is ' + wc + '. They must match.');
         }
-        if (dc < wc) warnings.push('Only ' + dc + ' Communist tiles but ' + wc + ' needed to win — Communists cannot win on policies.');
+        if (dc < wc) warnings.push('Only ' + dc + ' Communist tiles but ' + wc + ' needed to win - Communists cannot win on policies.');
       }
     }
 
@@ -347,7 +347,7 @@
       errors.push('Voting mode must be one of: table, open, secret.');
     }
     if (c.revealVotes === false) {
-      warnings.push('Anonymous voting is a house rule — official Secret Hitler votes are public, and hiding them removes key deduction information.');
+      warnings.push('Anonymous voting is a house rule - official Secret Hitler votes are public, and hiding them removes key deduction information.');
     }
 
     return { ok: errors.length === 0, errors: errors, warnings: warnings };
@@ -487,7 +487,7 @@
   // The set a President may actually nominate from. Normally the term-eligible
   // players; but if term limits would leave NO valid candidate (possible after
   // executions in small/custom games), they are relaxed for this election so the
-  // game can never deadlock — mirroring the spirit of the official 5-player rule.
+  // game can never deadlock - mirroring the spirit of the official 5-player rule.
   function nominationCandidates(state) {
     var strict = eligibleChancellors(state);
     if (strict.length > 0) return { ids: strict, relaxed: false };
@@ -633,7 +633,7 @@
     state.lastElected = { president: null, chancellor: null }; // term limits forgotten
     applyPolicy(state, top, true);
     state.enactments.push({ round: state.round, color: top, presidentId: null, chancellorId: null, chaos: true });
-    pushLog(state, 'Three failed elections — the country falls into chaos. Top policy enacted: ' +
+    pushLog(state, 'Three failed elections - the country falls into chaos. Top policy enacted: ' +
       policyWord(top) + '. Term limits forgotten.');
     if (checkPolicyWin(state)) return;
     reshuffleIfNeeded(state);
@@ -680,7 +680,7 @@
   function chancellorRequestVeto(state) {
     if (state.phase !== 'legislative_chancellor') throw new Error('Not in Chancellor legislative phase.');
     if (!state.vetoUnlocked) throw new Error('Veto is not unlocked yet.');
-    if (state.vetoRefused) throw new Error('Veto was already refused this session — the Chancellor must enact.');
+    if (state.vetoRefused) throw new Error('Veto was already refused this session - the Chancellor must enact.');
     state.pendingVeto = true;
     state.phase = 'veto_consent';
     pushLog(state, nameOf(state, state.nomineeChancellorId) + ' (Chancellor) proposes to VETO this agenda.');
@@ -895,7 +895,7 @@
     state.winner = winner;
     state.winReason = reason;
     state.phase = 'game_over';
-    pushLog(state, (winner === 'liberal' ? 'LIBERALS' : 'FASCISTS') + ' WIN — ' + reason);
+    pushLog(state, (winner === 'liberal' ? 'LIBERALS' : 'FASCISTS') + ' WIN - ' + reason);
     return state;
   }
 

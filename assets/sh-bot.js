@@ -1,13 +1,13 @@
 /*
- * sh-bot.js — bot "brain" for Secret Hitler. Pure, no DOM. Decides legal moves
+ * sh-bot.js - bot "brain" for Secret Hitler. Pure, no DOM. Decides legal moves
  * for AI-controlled seats based on the bot's legitimate knowledge (its role +
  * faction allies it would know at night) and a simple public-suspicion heuristic
  * computed from the enactment history. Faction-aware and works in 3-faction (XL)
  * games too. Decisions are deliberately "decent, not genius" (like the reference
- * online game's bots) — the goal is fun seat-filling, not perfect play.
+ * online game's bots) - the goal is fun seat-filling, not perfect play.
  *
  * The caller (UI) supplies candidate/target lists from the engine so the bot never
- * has to re-implement eligibility rules — it only ranks among legal options.
+ * has to re-implement eligibility rules - it only ranks among legal options.
  */
 (function (root, factory) {
   var SHBot = factory();
@@ -72,7 +72,7 @@
       if (state.fascistPolicies >= cfg.hitlerChancellorThreshold) {
         for (var i = 0; i < eligibleIds.length; i++) if (player(state, eligibleIds[i]).role === 'hitler') return eligibleIds[i];
       }
-      // otherwise pick a trusted-looking Chancellor so the government passes — the
+      // otherwise pick a trusted-looking Chancellor so the government passes - the
       // fascist President then forces a Fascist policy via the discard.
       return pickExtreme(eligibleIds, function (id) { return lean(state, id) + rnd() * 0.3; }, false);
     }
@@ -95,7 +95,7 @@
       // block an imminent Liberal win, unless a fascist President can force Fascist instead
       if (state.liberalPolicies >= cfg.win.liberal - 1 && !k.allies[presId]) return 'nein';
       if (k.allies[presId] || k.allies[chancId]) return 'ja';
-      return rnd() < 0.82 ? 'ja' : 'nein'; // keep forming governments — the deck favours Fascists
+      return rnd() < 0.82 ? 'ja' : 'nein'; // keep forming governments - the deck favours Fascists
     }
     // liberal / Hitler / communist: support trusted-looking governments.
     // A little noise = imperfect deduction (real Liberals misjudge), which keeps the

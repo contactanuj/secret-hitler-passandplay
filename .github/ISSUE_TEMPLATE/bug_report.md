@@ -25,7 +25,7 @@ What you expected, and what happened instead.
 
 **Hidden-information leak?**
 > If the app showed a secret role / drawn policy / investigation result / vote
-> (before reveal) on a screen others could see, please say so — these are
+> (before reveal) on a screen others could see, please say so - these are
 > high priority.
 
 **Environment**

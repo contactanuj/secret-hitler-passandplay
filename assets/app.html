@@ -8,7 +8,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <title>Secret Hitler</title>
   <style>
-/* styles.css — Secret Hitler pass-and-play. Dark, warm 1930s palette. */
+/* styles.css - Secret Hitler pass-and-play. Dark, warm 1930s palette. */
 :root {
   --bg: #0f0d0b;
   --panel: #1b1713;
@@ -212,7 +212,7 @@ select {
   <div id="app"></div>
   <script>
 /*
- * sh-engine.js — Secret Hitler rules engine (pure, transport-agnostic).
+ * sh-engine.js - Secret Hitler rules engine (pure, transport-agnostic).
  *
  * No DOM, no network. Deterministic given a seed, so it can be:
  *   - unit-tested in Node by simulating full games (tests/engine.test.js),
@@ -282,7 +282,7 @@ select {
   var RULESETS = {
     official: { name: 'Official', desc: 'Standard rules, balanced for your player count.', cfg: {}, feel: { tips: false } },
     beginner: { name: 'Beginner', desc: 'Table voting + extra on-screen guidance for new groups.', cfg: { votingMode: 'table', revealVotes: true }, feel: { tips: true } },
-    fast: { name: 'Fast', desc: 'Chaos after 2 failed elections — quicker, wilder games.', cfg: { electionTrackerMax: 2 }, feel: { tips: false } },
+    fast: { name: 'Fast', desc: 'Chaos after 2 failed elections - quicker, wilder games.', cfg: { electionTrackerMax: 2 }, feel: { tips: false } },
     tense: { name: 'Tense', desc: 'Secret on-device voting for maximum paranoia.', cfg: { votingMode: 'secret', revealVotes: true }, feel: { tips: false } }
   };
 
@@ -296,7 +296,7 @@ select {
   }
 
   // ---------------------------------------------------------------------------
-  // Seeded PRNG (mulberry32) — deterministic + JSON-serializable via state.rngState.
+  // Seeded PRNG (mulberry32) - deterministic + JSON-serializable via state.rngState.
   // ---------------------------------------------------------------------------
 
   function nextRand(state) {
@@ -349,9 +349,9 @@ select {
       hitlerChancellorThreshold: 3,
       vetoUnlockAt: 5,
       // How the public election vote is taken:
-      //   'table'  — group votes IRL with hands/cards; app records only Passed/Failed
-      //   'open'   — app records each player's Ja/Nein openly on one shared screen
-      //   'secret' — pass-and-play: each player votes privately, revealed together
+      //   'table'  - group votes IRL with hands/cards; app records only Passed/Failed
+      //   'open'   - app records each player's Ja/Nein openly on one shared screen
+      //   'secret' - pass-and-play: each player votes privately, revealed together
       votingMode: 'table',
       // Votes are public per the official rules. false = anonymous house-rule.
       revealVotes: true,
@@ -393,7 +393,7 @@ select {
   //   liberals + fascists + communists + 1 (Hitler) === playerCount,
   // with liberals >= 1 and fascists >= 1. Fascists/Communists are trimmed if they'd
   // leave no room for a Liberal + the single Hitler. Liberals auto-fill the remainder.
-  // Idempotent — safe to call on every render so an against-the-count config is
+  // Idempotent - safe to call on every render so an against-the-count config is
   // simply unreachable.
   function normalizeRoles(config) {
     var pc = config.playerCount, r = config.roles;
@@ -466,7 +466,7 @@ select {
       var nm = (names[i] || '').trim();
       if (!nm) { errors.push('Every player needs a name (player ' + (i + 1) + ' is blank).'); continue; }
       var key = nm.toLowerCase();
-      if (seen[key]) warnings.push('Duplicate name "' + nm + '" — players may be hard to tell apart.');
+      if (seen[key]) warnings.push('Duplicate name "' + nm + '" - players may be hard to tell apart.');
       seen[key] = true;
     }
 
@@ -477,11 +477,11 @@ select {
       errors.push('Deck policy counts must be non-negative numbers.');
     } else {
       if (dl + df + dc < 3) errors.push('The policy deck needs at least 3 tiles (the President draws 3).');
-      if (df < 1) warnings.push('No Fascist policies in the deck — Fascists can only win by electing Hitler.');
-      if (dl < 1) warnings.push('No Liberal policies in the deck — Liberals can only win by killing Hitler.');
+      if (df < 1) warnings.push('No Fascist policies in the deck - Fascists can only win by electing Hitler.');
+      if (dl < 1) warnings.push('No Liberal policies in the deck - Liberals can only win by killing Hitler.');
     }
 
-    // Win thresholds vs deck — these are warnings, not errors: an unreachable
+    // Win thresholds vs deck - these are warnings, not errors: an unreachable
     // policy track still leaves the Hitler win/lose paths, so the game is playable.
     var wl = c.win && c.win.liberal, wf = c.win && c.win.fascist;
     if (!(wl >= 1) || !(wf >= 1)) {
@@ -489,11 +489,11 @@ select {
     } else {
       if (dl >= 0 && dl < wl) {
         warnings.push('Only ' + dl + ' Liberal tiles but ' + wl +
-          ' needed to win — Liberals cannot win on policies (only by killing Hitler).');
+          ' needed to win - Liberals cannot win on policies (only by killing Hitler).');
       }
       if (df >= 0 && df < wf) {
         warnings.push('Only ' + df + ' Fascist tiles but ' + wf +
-          ' needed to win — Fascists cannot win on policies (only by electing Hitler).');
+          ' needed to win - Fascists cannot win on policies (only by electing Hitler).');
       }
     }
 
@@ -519,18 +519,18 @@ select {
     if (c.hitlerChancellorThreshold < 0) errors.push('Hitler-Chancellor threshold cannot be negative.');
     if (wf >= 1 && c.hitlerChancellorThreshold > wf) {
       warnings.push('Hitler-as-Chancellor only becomes a loss after ' + c.hitlerChancellorThreshold +
-        ' Fascist policies, but the game ends at ' + wf + ' — that win condition can never trigger.');
+        ' Fascist policies, but the game ends at ' + wf + ' - that win condition can never trigger.');
     }
     if (!(c.vetoUnlockAt >= 1)) {
       errors.push('Veto unlock threshold must be at least 1.');
     } else if (wf >= 1 && c.vetoUnlockAt > wf) {
       warnings.push('Veto unlocks at ' + c.vetoUnlockAt + ' Fascist policies, but the game ends at ' +
-        wf + ' — veto will never become available.');
+        wf + ' - veto will never become available.');
     }
 
     // Off-spec player counts: supported, but balance is not guaranteed.
     if (!PRESETS[pc] && pc >= 2) {
-      warnings.push('Player count ' + pc + ' is outside the official 5-10 range — playable, but balance is untested.');
+      warnings.push('Player count ' + pc + ' is outside the official 5-10 range - playable, but balance is untested.');
     }
 
     // Bots must fit within the player count.
@@ -538,12 +538,12 @@ select {
     if (bots < 0 || bots > pc) {
       errors.push('Bots (' + bots + ') must be between 0 and the player count (' + pc + ').');
     } else if (bots === pc) {
-      warnings.push('All seats are bots — useful as a demo, but no one is playing.');
+      warnings.push('All seats are bots - useful as a demo, but no one is playing.');
     }
 
     // Communist (Secret Hitler XL) expansion checks.
     if (comm > 0) {
-      warnings.push('The Communist (Secret Hitler XL) faction is enabled — a fun but experimental variant whose balance is not officially tuned.');
+      warnings.push('The Communist (Secret Hitler XL) faction is enabled - a fun but experimental variant whose balance is not officially tuned.');
       var wc = c.win && c.win.communist;
       if (!(wc >= 1)) {
         errors.push('Communist win threshold must be at least 1.');
@@ -551,7 +551,7 @@ select {
         if ((c.communistBoard || []).length !== wc) {
           errors.push('The Communist board has ' + (c.communistBoard || []).length + ' slot(s) but the Communist win threshold is ' + wc + '. They must match.');
         }
-        if (dc < wc) warnings.push('Only ' + dc + ' Communist tiles but ' + wc + ' needed to win — Communists cannot win on policies.');
+        if (dc < wc) warnings.push('Only ' + dc + ' Communist tiles but ' + wc + ' needed to win - Communists cannot win on policies.');
       }
     }
 
@@ -560,7 +560,7 @@ select {
       errors.push('Voting mode must be one of: table, open, secret.');
     }
     if (c.revealVotes === false) {
-      warnings.push('Anonymous voting is a house rule — official Secret Hitler votes are public, and hiding them removes key deduction information.');
+      warnings.push('Anonymous voting is a house rule - official Secret Hitler votes are public, and hiding them removes key deduction information.');
     }
 
     return { ok: errors.length === 0, errors: errors, warnings: warnings };
@@ -700,7 +700,7 @@ select {
   // The set a President may actually nominate from. Normally the term-eligible
   // players; but if term limits would leave NO valid candidate (possible after
   // executions in small/custom games), they are relaxed for this election so the
-  // game can never deadlock — mirroring the spirit of the official 5-player rule.
+  // game can never deadlock - mirroring the spirit of the official 5-player rule.
   function nominationCandidates(state) {
     var strict = eligibleChancellors(state);
     if (strict.length > 0) return { ids: strict, relaxed: false };
@@ -846,7 +846,7 @@ select {
     state.lastElected = { president: null, chancellor: null }; // term limits forgotten
     applyPolicy(state, top, true);
     state.enactments.push({ round: state.round, color: top, presidentId: null, chancellorId: null, chaos: true });
-    pushLog(state, 'Three failed elections — the country falls into chaos. Top policy enacted: ' +
+    pushLog(state, 'Three failed elections - the country falls into chaos. Top policy enacted: ' +
       policyWord(top) + '. Term limits forgotten.');
     if (checkPolicyWin(state)) return;
     reshuffleIfNeeded(state);
@@ -893,7 +893,7 @@ select {
   function chancellorRequestVeto(state) {
     if (state.phase !== 'legislative_chancellor') throw new Error('Not in Chancellor legislative phase.');
     if (!state.vetoUnlocked) throw new Error('Veto is not unlocked yet.');
-    if (state.vetoRefused) throw new Error('Veto was already refused this session — the Chancellor must enact.');
+    if (state.vetoRefused) throw new Error('Veto was already refused this session - the Chancellor must enact.');
     state.pendingVeto = true;
     state.phase = 'veto_consent';
     pushLog(state, nameOf(state, state.nomineeChancellorId) + ' (Chancellor) proposes to VETO this agenda.');
@@ -1108,7 +1108,7 @@ select {
     state.winner = winner;
     state.winReason = reason;
     state.phase = 'game_over';
-    pushLog(state, (winner === 'liberal' ? 'LIBERALS' : 'FASCISTS') + ' WIN — ' + reason);
+    pushLog(state, (winner === 'liberal' ? 'LIBERALS' : 'FASCISTS') + ' WIN - ' + reason);
     return state;
   }
 
@@ -1192,15 +1192,15 @@ select {
   </script>
   <script>
 /*
- * sh-bot.js — bot "brain" for Secret Hitler. Pure, no DOM. Decides legal moves
+ * sh-bot.js - bot "brain" for Secret Hitler. Pure, no DOM. Decides legal moves
  * for AI-controlled seats based on the bot's legitimate knowledge (its role +
  * faction allies it would know at night) and a simple public-suspicion heuristic
  * computed from the enactment history. Faction-aware and works in 3-faction (XL)
  * games too. Decisions are deliberately "decent, not genius" (like the reference
- * online game's bots) — the goal is fun seat-filling, not perfect play.
+ * online game's bots) - the goal is fun seat-filling, not perfect play.
  *
  * The caller (UI) supplies candidate/target lists from the engine so the bot never
- * has to re-implement eligibility rules — it only ranks among legal options.
+ * has to re-implement eligibility rules - it only ranks among legal options.
  */
 (function (root, factory) {
   var SHBot = factory();
@@ -1265,7 +1265,7 @@ select {
       if (state.fascistPolicies >= cfg.hitlerChancellorThreshold) {
         for (var i = 0; i < eligibleIds.length; i++) if (player(state, eligibleIds[i]).role === 'hitler') return eligibleIds[i];
       }
-      // otherwise pick a trusted-looking Chancellor so the government passes — the
+      // otherwise pick a trusted-looking Chancellor so the government passes - the
       // fascist President then forces a Fascist policy via the discard.
       return pickExtreme(eligibleIds, function (id) { return lean(state, id) + rnd() * 0.3; }, false);
     }
@@ -1288,7 +1288,7 @@ select {
       // block an imminent Liberal win, unless a fascist President can force Fascist instead
       if (state.liberalPolicies >= cfg.win.liberal - 1 && !k.allies[presId]) return 'nein';
       if (k.allies[presId] || k.allies[chancId]) return 'ja';
-      return rnd() < 0.82 ? 'ja' : 'nein'; // keep forming governments — the deck favours Fascists
+      return rnd() < 0.82 ? 'ja' : 'nein'; // keep forming governments - the deck favours Fascists
     }
     // liberal / Hitler / communist: support trusted-looking governments.
     // A little noise = imperfect deduction (real Liberals misjudge), which keeps the
@@ -1369,7 +1369,7 @@ select {
   </script>
   <script>
 /*
- * sound.js — tiny synthesized SFX (WebAudio, no asset files). Optional/toggleable.
+ * sound.js - tiny synthesized SFX (WebAudio, no asset files). Optional/toggleable.
  * Safely no-ops where WebAudio is unavailable (e.g. the headless Node smoke test).
  * Exposes window.SHSound.
  */
@@ -1436,7 +1436,7 @@ select {
   </script>
   <script>
 /*
- * ui.js — pass-and-play UI for Secret Hitler. Browser-only (uses the DOM).
+ * ui.js - pass-and-play UI for Secret Hitler. Browser-only (uses the DOM).
  * Depends on the SH engine (window.SH), inlined before this script by build.js.
  *
  * One device is passed around the table. All hidden information (roles, votes,
@@ -1531,7 +1531,7 @@ select {
     else if (view === 'game') html = renderGame();
     else html = renderHome();
     app.innerHTML = html;
-    // Only jump to the top on a genuine screen change — NOT on every re-render —
+    // Only jump to the top on a genuine screen change - NOT on every re-render -
     // so input within a screen (steppers, votes, board taps) keeps your scroll spot.
     var key = screenKey();
     if (key !== lastScreenKey) {
@@ -1679,7 +1679,7 @@ select {
       '<g transform="rotate(14 70 56)"><rect x="50" y="26" width="40" height="60" rx="6" fill="#c64232" stroke="#e27a6a" stroke-width="2.4"/><text x="70" y="62" text-anchor="middle" font-size="26" font-weight="800" fill="#efe7da">F</text></g>' +
       '</svg></div>',
       '<h1>SECRET HITLER</h1>',
-      '<p class="muted">Pass-and-play · one device · 5–10 players</p>',
+      '<p class="muted">Pass-and-play · one device · 5-10 players</p>',
       '</div>',
       '<div class="spacer"></div>',
       resume,
@@ -1688,7 +1688,7 @@ select {
       '<button class="btn ghost" data-action="openSettings">Settings</button>',
       statsLine,
       '<div class="spacer"></div>',
-      '<p class="small muted center">A hidden-role game of deception. The app deals roles and runs the board, deck, powers, and win conditions — you bring the table talk.</p>',
+      '<p class="small muted center">A hidden-role game of deception. The app deals roles and runs the board, deck, powers, and win conditions - you bring the table talk.</p>',
       '<p class="small muted center">Secret Hitler © its creators · CC BY-NC-SA 4.0 · non-commercial.</p>'
     ].join('');
   }
@@ -1706,7 +1706,7 @@ select {
       topbar('Settings', '<button class="iconbtn" data-action="backFromSettings">Done</button>'),
       '<div class="panel">',
       row('sound', 'Sound effects', 'Subtle synthesized cues for votes, policies, and powers.'),
-      row('tips', 'Guidance tips', 'Extra on-screen hints explaining each phase — great for new groups.'),
+      row('tips', 'Guidance tips', 'Extra on-screen hints explaining each phase - great for new groups.'),
       row('markers', 'Confirmed-not-Hitler markers', 'Mark players proven not to be Hitler (elected Chancellor after 3 Fascist policies).'),
       '</div>',
       '<div class="panel"><h3>This device</h3>',
@@ -1850,9 +1850,9 @@ select {
       '<h3>Voting</h3>',
       '<label>How the table votes</label>',
       '<select data-cfg-select="votingMode">',
-      votingOption('table', 'Table vote — vote IRL, app records the result', d.votingMode),
-      votingOption('open', 'Open — tap each vote on one shared screen', d.votingMode),
-      votingOption('secret', 'Secret — pass the device to vote privately', d.votingMode),
+      votingOption('table', 'Table vote - vote IRL, app records the result', d.votingMode),
+      votingOption('open', 'Open - tap each vote on one shared screen', d.votingMode),
+      votingOption('secret', 'Secret - pass the device to vote privately', d.votingMode),
       '</select>',
       checkboxRow('Reveal individual votes (official: on)', 'revealVotes', d.revealVotes),
       '<p class="small muted">The phone is still passed for hidden info (roles, the policy draw, investigate/peek). Only the public vote can be taken at the table.</p>',
@@ -1864,12 +1864,12 @@ select {
 
       '<div class="spacer"></div>',
       '<h3>Communist faction (XL)</h3>',
-      '<div class="row" style="margin-top:8px"><div class="grow small">Add a third Communist faction — experimental</div><button class="iconbtn" data-action="toggleCommunists">' + (commOn ? 'On' : 'Off') + '</button></div>',
+      '<div class="row" style="margin-top:8px"><div class="grow small">Add a third Communist faction - experimental</div><button class="iconbtn" data-action="toggleCommunists">' + (commOn ? 'On' : 'Off') + '</button></div>',
       commOn ? stepperRow('Communists', 'roles.communists', d.roles.communists, 1, Math.max(1, d.playerCount - d.roles.fascists - 2)) : '',
       commOn ? stepperRow('Communist tiles in deck', 'deck.communist', d.deck.communist, 0, 30) : '',
       commOn ? stepperRow('Communist policies to win', 'win.communist', d.win.communist, 1, 12) : '',
       commOn ? checkboxRow('Communists know each other', 'communistsKnowEachOther', d.communistsKnowEachOther) : '',
-      commOn ? '<p class="small muted">A fun but experimental variant — balance is not officially tuned. Powers: Bugging, Radicalisation, Confession, Five-Year Plan.</p>' : ''
+      commOn ? '<p class="small muted">A fun but experimental variant - balance is not officially tuned. Powers: Bugging, Radicalisation, Confession, Five-Year Plan.</p>' : ''
     ].join('');
   }
 
@@ -1894,7 +1894,7 @@ select {
     return [
       '<label>' + esc(label) + '</label>',
       '<div class="stepper" data-stepper="' + path + '" data-min="' + min + '" data-max="' + max + '">',
-      '<button data-step="-1">−</button>',
+      '<button data-step="-1">-</button>',
       '<div class="val">' + val + '</div>',
       '<button data-step="1">+</button>',
       '</div>'
@@ -1931,11 +1931,11 @@ select {
       var t = SH.getPlayer(G, cr.targetId);
       if (cr.gate) {
         return [topbar('Round ' + G.round, ''), renderBoard(),
-          passScreen(t.name, 'A power targets you — make sure only you can see the screen.', 'I am ' + esc(t.name), 'convReveal')].join('');
+          passScreen(t.name, 'A power targets you - make sure only you can see the screen.', 'I am ' + esc(t.name), 'convReveal')].join('');
       }
       var cbody = cr.success
-        ? '<div class="rolecard communist flip"><div class="muted">' + esc(t.name) + ', you have been</div><div class="big">RADICALISED</div><div class="small">You are now a Communist — you win with the Communist team.</div></div><p class="small muted">Keep it secret and pursue the Communist agenda.</p>'
-        : '<div class="rolecard hitler flip"><div class="muted">' + esc(t.name) + '</div><div class="big">IMMUNE</div><div class="small">You cannot be radicalised — your secret role is unchanged.</div></div>';
+        ? '<div class="rolecard communist flip"><div class="muted">' + esc(t.name) + ', you have been</div><div class="big">RADICALISED</div><div class="small">You are now a Communist - you win with the Communist team.</div></div><p class="small muted">Keep it secret and pursue the Communist agenda.</p>'
+        : '<div class="rolecard hitler flip"><div class="muted">' + esc(t.name) + '</div><div class="big">IMMUNE</div><div class="small">You cannot be radicalised - your secret role is unchanged.</div></div>';
       return [topbar('Round ' + G.round, ''), renderBoard(),
         '<div class="panel center">' + cbody + '<button class="btn primary" data-action="convDone">Hide &amp; continue</button></div>'].join('');
     }
@@ -1974,7 +1974,7 @@ select {
       fas.push('<div class="slot fas' + (j < G.fascistPolicies ? ' filled' : '') + '">' +
         (j < G.fascistPolicies ? 'F' : '<span class="pw">' + lbl + '</span>') + '</div>');
     }
-    // Communist track (XL) — only when the expansion is enabled
+    // Communist track (XL) - only when the expansion is enabled
     var commEnabled = (c.roles.communists || 0) > 0;
     var comm = [];
     if (commEnabled) {
@@ -2024,7 +2024,7 @@ select {
 
   function powerShort(p) {
     return { investigate: 'INVEST.', special_election: 'SP. ELEC', policy_peek: 'PEEK', execution: 'EXECUTE',
-      bugging: 'BUG', radicalisation: 'RADICAL', confession: 'CONFESS', five_year_plan: '5-YR', win: 'WIN' }[p] || '—';
+      bugging: 'BUG', radicalisation: 'RADICAL', confession: 'CONFESS', five_year_plan: '5-YR', win: 'WIN' }[p] || '-';
   }
 
   // ---- Reveal (night phase) ---------------------------------------------
@@ -2046,7 +2046,7 @@ select {
         G.config.hitlerKnowsFascists
           ? '<p class="small muted">Small game: Hitler will see the Fascists, and the Fascists will see Hitler.</p>'
           : '<p class="small muted">Fascists will see each other and Hitler. Hitler will <b>not</b> know who the Fascists are.</p>',
-        nComm > 0 ? '<p class="small muted">Communists are a <b>third team</b> with their own track — they will see each other.</p>' : '',
+        nComm > 0 ? '<p class="small muted">Communists are a <b>third team</b> with their own track - they will see each other.</p>' : '',
         '</div>',
         '<button class="btn primary" data-action="revealStart">Begin role reveal</button>'
       ].join('');
@@ -2064,7 +2064,7 @@ select {
 
     var p = players[ui.revealIdx];
     if (!ui.revealShown) {
-      return passScreen(p.name, 'Make sure only ' + esc(p.name) + ' can see the screen.', 'I am ' + esc(p.name) + ' — show my role', 'revealShow');
+      return passScreen(p.name, 'Make sure only ' + esc(p.name) + ' can see the screen.', 'I am ' + esc(p.name) + ' - show my role', 'revealShow');
     }
     return [
       topbar('Secret roles', ''),
@@ -2074,23 +2074,23 @@ select {
     ].join('');
   }
 
-  // Private role-card content — used by the night reveal AND the in-game re-check.
+  // Private role-card content - used by the night reveal AND the in-game re-check.
   function roleCardContent(p) {
     var info = SH.revealInfo(G, p.id);
     var roleLabel = info.role === 'hitler' ? 'HITLER' : info.role.toUpperCase();
     var knows = '';
     if (info.knows.length) {
-      knows = '<div class="note"><b>You know:</b><br>' + info.knows.map(function (k) { return esc(k.name) + ' — ' + esc(k.label); }).join('<br>') + '</div>';
+      knows = '<div class="note"><b>You know:</b><br>' + info.knows.map(function (k) { return esc(k.name) + ' - ' + esc(k.label); }).join('<br>') + '</div>';
     } else if (info.role === 'hitler') {
       knows = '<div class="note">You do not know your Fascists. Earn their trust and stay hidden.</div>';
     } else if (info.role === 'liberal') {
       knows = '<div class="note">You know no one. Deduce who the Fascists are.</div>';
     } else if (info.role === 'communist') {
-      knows = '<div class="note">You are the lone Communist — pursue your own agenda.</div>';
+      knows = '<div class="note">You are the lone Communist - pursue your own agenda.</div>';
     }
     var teamNote;
     if (info.role === 'liberal') teamNote = 'You win by enacting ' + G.config.win.liberal + ' Liberal Policies or by killing Hitler.';
-    else if (info.role === 'communist') teamNote = 'You win by enacting ' + G.config.win.communist + ' Communist Policies — a third team, neither Liberal nor Fascist.';
+    else if (info.role === 'communist') teamNote = 'You win by enacting ' + G.config.win.communist + ' Communist Policies - a third team, neither Liberal nor Fascist.';
     else teamNote = 'You win by enacting ' + G.config.win.fascist + ' Fascist Policies, or by electing Hitler Chancellor after ' + G.config.hitlerChancellorThreshold + ' Fascist Policies.';
     var teamLabel = info.role === 'liberal' ? 'Liberal team' : (info.role === 'communist' ? 'Communist team' : 'Fascist team');
     return [
@@ -2133,13 +2133,13 @@ select {
       }).join('');
       return [
         topbar('Check a role', '<button class="iconbtn" data-action="recheckCancel">Cancel</button>'),
-        '<div class="panel"><h2>Whose role?</h2><p class="muted">Tap your own name — your role shows privately and auto-hides. (AI seats are hidden.)</p>' + btns + '</div>'
+        '<div class="panel"><h2>Whose role?</h2><p class="muted">Tap your own name - your role shows privately and auto-hides. (AI seats are hidden.)</p>' + btns + '</div>'
       ].join('');
     }
     var p = SH.getPlayer(G, r.pid);
     if (r.stage === 'gate') {
       return [topbar('Check a role', '<button class="iconbtn" data-action="recheckCancel">Cancel</button>'),
-        passScreen(p.name, 'Make sure only ' + esc(p.name) + ' can see the screen.', 'I am ' + esc(p.name) + ' — show my role', 'recheckReveal')].join('');
+        passScreen(p.name, 'Make sure only ' + esc(p.name) + ' can see the screen.', 'I am ' + esc(p.name) + ' - show my role', 'recheckReveal')].join('');
     }
     return [topbar('Check a role', ''), roleCardContent(p), countdownBar(),
       '<button class="btn primary" data-action="recheckDone">Hide</button>'].join('');
@@ -2176,7 +2176,7 @@ select {
       '<h2>' + esc(nameOf(pres)) + ' is President</h2>',
       '<p class="muted">Discuss, then nominate a Chancellor.' + (nc.relaxed ? '' : ' Term-limited players are greyed out.') + '</p>',
       nc.relaxed ? '<div class="warn small">No term-eligible candidate remained, so term limits are relaxed for this election.</div>' : '',
-      tip('The whole table will vote Ja/Nein on this pair. Pick someone you can get approved — and watch who objects.'),
+      tip('The whole table will vote Ja/Nein on this pair. Pick someone you can get approved - and watch who objects.'),
       buttons,
       '</div>'
     ].join('');
@@ -2227,14 +2227,14 @@ select {
       '<h2>Table vote</h2>',
       '<p class="muted">' + govLine + '</p>',
       '<div class="note small">Everyone votes out loud or with Ja/Nein cards at the same time. Then record the result.</div>',
-      tip('A tie FAILS — you need strictly more Ja than Nein. Three failed elections in a row triggers chaos.'),
+      tip('A tie FAILS - you need strictly more Ja than Nein. Three failed elections in a row triggers chaos.'),
       '<div class="row" style="gap:12px;margin-top:6px">',
       '<button class="btn lib grow" data-action="quickResult" data-arg="pass">PASSED</button>',
       '<button class="btn fas grow" data-action="quickResult" data-arg="fail">FAILED</button>',
       '</div>',
       '<p class="small muted center" style="margin-top:14px">or log the exact tally</p>',
       '<div class="row" style="justify-content:center;gap:10px">',
-      '<button class="iconbtn" data-action="jaDec">−</button>',
+      '<button class="iconbtn" data-action="jaDec">-</button>',
       '<div style="min-width:130px;text-align:center"><b>' + ui.jaCount + '</b> Ja / ' + (alive.length - ui.jaCount) + ' Nein</div>',
       '<button class="iconbtn" data-action="jaInc">+</button>',
       '</div>',
@@ -2267,7 +2267,7 @@ select {
   function renderSecretVote(alive, govLine) {
     var voter = alive[ui.voteIdx];
     if (ui.voterGate) {
-      return passScreen(voter.name, 'Vote on: ' + govLine, 'I am ' + esc(voter.name) + ' — vote', 'voteReveal');
+      return passScreen(voter.name, 'Vote on: ' + govLine, 'I am ' + esc(voter.name) + ' - vote', 'voteReveal');
     }
     return [
       '<div class="panel center">',
@@ -2285,7 +2285,7 @@ select {
   // ---- Legislative: President -------------------------------------------
   function renderLegPresident() {
     if (ui.gate) {
-      return passScreen(nameOf(G.currentPresidentId), 'Legislative session — President only. No talking during this phase.',
+      return passScreen(nameOf(G.currentPresidentId), 'Legislative session - President only. No talking during this phase.',
         'I am ' + esc(nameOf(G.currentPresidentId)) + ' (President)', 'ungate');
     }
     var tiles = G.drawnPolicies.map(function (c, i) {
@@ -2295,7 +2295,7 @@ select {
       '<div class="panel">',
       '<h2>President: discard one</h2>',
       '<p class="muted">You drew 3 policies. Tap one to <b>discard</b> it; the other two pass to Chancellor ' + esc(nameOf(G.nomineeChancellorId)) + '. Nobody sees what you discard.</p>',
-      tip('Afterward you may claim anything about what you drew. Fascists exploit this — and so can a desperate Liberal.'),
+      tip('Afterward you may claim anything about what you drew. Fascists exploit this - and so can a desperate Liberal.'),
       '<div class="tiles">' + tiles + '</div>',
       '</div>'
     ].join('');
@@ -2304,7 +2304,7 @@ select {
   // ---- Legislative: Chancellor ------------------------------------------
   function renderLegChancellor() {
     if (ui.gate) {
-      return passScreen(nameOf(G.nomineeChancellorId), 'Legislative session — Chancellor only. No talking.',
+      return passScreen(nameOf(G.nomineeChancellorId), 'Legislative session - Chancellor only. No talking.',
         'I am ' + esc(nameOf(G.nomineeChancellorId)) + ' (Chancellor)', 'ungate');
     }
     var tiles = G.chancellorPolicies.map(function (c, i) {
@@ -2317,7 +2317,7 @@ select {
       '<div class="panel">',
       '<h2>Chancellor: enact one</h2>',
       '<p class="muted">Tap a policy to <b>enact</b> it. The other is discarded secretly.</p>',
-      tip('If you were only handed Fascist policies, you must enact one — but you can blame the President. They might be lying too.'),
+      tip('If you were only handed Fascist policies, you must enact one - but you can blame the President. They might be lying too.'),
       '<div class="tiles">' + tiles + '</div>',
       veto,
       '</div>'
@@ -2362,13 +2362,13 @@ select {
 
     // no-target powers
     if (power === 'policy_peek') return powerButtonPanel('Policy Peek', 'Secretly view the top 3 policies (order preserved).', 'doPeek', 'Reveal top 3');
-    if (power === 'confession') return powerButtonPanel('Confession', 'Your Party will be revealed publicly to the whole table — and shown on the board.', 'doConfess', 'Confess publicly');
+    if (power === 'confession') return powerButtonPanel('Confession', 'Your Party will be revealed publicly to the whole table - and shown on the board.', 'doConfess', 'Confess publicly');
     if (power === 'five_year_plan') return powerButtonPanel('Five-Year Plan', 'Shuffle 2 Communist and 1 Liberal policy into the deck.', 'doFiveYear', 'Enact the plan');
 
     // target-picker powers
     var meta = {
-      investigate: { label: 'Investigate Loyalty', help: 'Choose a player to inspect. You (only) see their Party — Liberal or Fascist. Each player can be investigated once.', act: 'doInvestigate', noInvestigated: true },
-      bugging: { label: 'Bugging', help: 'Choose a player to bug. You (only) see their Party — Liberal, Fascist, or Communist.', act: 'doBugging' },
+      investigate: { label: 'Investigate Loyalty', help: 'Choose a player to inspect. You (only) see their Party - Liberal or Fascist. Each player can be investigated once.', act: 'doInvestigate', noInvestigated: true },
+      bugging: { label: 'Bugging', help: 'Choose a player to bug. You (only) see their Party - Liberal, Fascist, or Communist.', act: 'doBugging' },
       special_election: { label: 'Call Special Election', help: 'Choose any player to be the next Presidential Candidate. Rotation resumes to your left afterward.', act: 'doSpecial' },
       execution: { label: 'Execution', help: 'Choose a player to execute. They are out of the game. If they are Hitler, the Liberals win.', act: 'doExecute', danger: true },
       radicalisation: { label: 'Radicalisation', help: 'Choose a player to convert to the Communist party. Hitler cannot be converted. The result is shown privately to them.', act: 'doRadicalise' }
@@ -2380,7 +2380,7 @@ select {
       return '<button class="' + (meta.danger ? 'btn danger' : 'btn') + '" data-action="' + meta.act + '" data-arg="' + p.id + '">' + esc(p.name) + '</button>';
     }).join('');
 
-    return ['<div class="panel">', '<h2>' + esc(meta.label) + '</h2>', '<p class="muted">' + esc(meta.help) + '</p>', tip(power === 'radicalisation' ? 'A converted player switches sides for the rest of the game — and will be shown the other Communists at the next Congress (future).' : 'You may lie about anything you learn.'), list, '</div>'].join('');
+    return ['<div class="panel">', '<h2>' + esc(meta.label) + '</h2>', '<p class="muted">' + esc(meta.help) + '</p>', tip(power === 'radicalisation' ? 'A converted player switches sides for the rest of the game - and will be shown the other Communists at the next Congress (future).' : 'You may lie about anything you learn.'), list, '</div>'].join('');
   }
 
   // ---- Game over --------------------------------------------------------
@@ -2514,16 +2514,16 @@ select {
       // nomination
       case 'nominate': SH.nominate(G, arg); sfx('tap'); save(); render(); break;
 
-      // voting — secret (pass-and-play)
+      // voting - secret (pass-and-play)
       case 'voteReveal': ui.voterGate = false; sfx('pass'); render(); break;
       case 'vote': { var ha = SH.alivePlayers(G).filter(function (p) { return !p.isBot; }); SH.castVote(G, ha[ui.voteIdx].id, arg); sfx(arg === 'ja' ? 'ja' : 'nein'); ui.voteIdx++; ui.voterGate = true; render(); break; }
       case 'resolveVotes': SH.resolveVotes(G); soundAfterVote(); save(); render(); break;
-      // voting — table (IRL)
+      // voting - table (IRL)
       case 'quickResult': SH.resolveElectionManual(G, arg === 'pass'); soundAfterVote(); save(); render(); break;
       case 'jaInc': ui.jaCount = Math.min(SH.aliveCount(G), (ui.jaCount || 0) + 1); render(); break;
       case 'jaDec': ui.jaCount = Math.max(0, (ui.jaCount || 0) - 1); render(); break;
       case 'quickCount': SH.resolveElectionManual(G, null, ui.jaCount || 0); soundAfterVote(); save(); render(); break;
-      // voting — open (one shared screen)
+      // voting - open (one shared screen)
       case 'openSet': { var parts = arg.split(':'); if (!ui.openVotes) ui.openVotes = {}; ui.openVotes[parts[0]] = parts[1]; render(); break; }
       case 'openSubmit': {
         var ha = SH.alivePlayers(G).filter(function (p) { return !p.isBot; });
@@ -2548,7 +2548,7 @@ select {
       case 'doInvestigate': {
         var party = SH.powerInvestigate(G, arg);
         sfx('power');
-        ui.powerResult = { title: 'Investigation result', body: '<div class="rolecard ' + (party === 'Liberal' ? 'liberal' : 'fascist') + ' flip"><div class="muted">' + esc(nameOf(arg)) + ' is a</div><div class="big">' + party.toUpperCase() + '</div></div><p class="small muted">You may tell the table the truth — or lie.</p>' };
+        ui.powerResult = { title: 'Investigation result', body: '<div class="rolecard ' + (party === 'Liberal' ? 'liberal' : 'fascist') + ' flip"><div class="muted">' + esc(nameOf(arg)) + ' is a</div><div class="big">' + party.toUpperCase() + '</div></div><p class="small muted">You may tell the table the truth - or lie.</p>' };
         save(); render(); break;
       }
       case 'doSpecial': SH.powerSpecialElection(G, arg); sfx('power'); save(); render(); break;
@@ -2568,7 +2568,7 @@ select {
       case 'doBugging': {
         var bparty = SH.powerBugging(G, arg);
         sfx('power');
-        ui.powerResult = { title: 'Bugging result', body: '<div class="rolecard ' + partyClass(bparty) + ' flip"><div class="muted">' + esc(nameOf(arg)) + ' is a</div><div class="big">' + bparty.toUpperCase() + '</div></div><p class="small muted">Only you saw this. Truth or lie — your call.</p>' };
+        ui.powerResult = { title: 'Bugging result', body: '<div class="rolecard ' + partyClass(bparty) + ' flip"><div class="muted">' + esc(nameOf(arg)) + ' is a</div><div class="big">' + bparty.toUpperCase() + '</div></div><p class="small muted">Only you saw this. Truth or lie - your call.</p>' };
         save(); render(); break;
       }
       case 'doRadicalise': {
@@ -2580,7 +2580,7 @@ select {
       case 'doConfess': {
         var cparty = SH.powerConfession(G);
         sfx('power');
-        ui.powerResult = { title: 'Confession', body: '<div class="rolecard ' + partyClass(cparty) + '"><div class="muted">You publicly revealed yourself as</div><div class="big">' + cparty.toUpperCase() + '</div></div><p class="small muted">The whole table now knows — it is shown on the board.</p>' };
+        ui.powerResult = { title: 'Confession', body: '<div class="rolecard ' + partyClass(cparty) + '"><div class="muted">You publicly revealed yourself as</div><div class="big">' + cparty.toUpperCase() + '</div></div><p class="small muted">The whole table now knows - it is shown on the board.</p>' };
         save(); render(); break;
       }
       case 'doFiveYear': {
@@ -2727,11 +2727,11 @@ select {
       '<div class="panel"><h2>Goal</h2>',
       '<p class="small"><b>Liberals</b> win by enacting 5 Liberal Policies <i>or</i> assassinating Hitler. <b>Fascists</b> win by enacting 6 Fascist Policies <i>or</i> by getting Hitler elected Chancellor after 3 Fascist Policies are in play.</p></div>',
       '<div class="panel"><h2>Each round</h2>',
-      '<p class="small">1. The <b>President</b> nominates a <b>Chancellor</b>. Everyone votes Ja/Nein — a strict majority elects them (ties fail).</p>',
+      '<p class="small">1. The <b>President</b> nominates a <b>Chancellor</b>. Everyone votes Ja/Nein - a strict majority elects them (ties fail).</p>',
       '<p class="small">2. If elected, the President draws 3 policies, secretly discards 1, and passes 2 to the Chancellor, who enacts 1.</p>',
       '<p class="small">3. Some Fascist policies grant the President a one-time power: investigate, special election, policy peek, or execution.</p>',
       '<p class="small">3 failed elections in a row = chaos: the top policy is enacted automatically.</p></div>',
-      '<div class="panel"><h2>Lying</h2><p class="small">You may lie about anything hidden (your role, policies you drew, investigation results) — except a player who is Hitler must admit it if assassinated or elected Chancellor after the 3rd Fascist policy.</p></div>',
+      '<div class="panel"><h2>Lying</h2><p class="small">You may lie about anything hidden (your role, policies you drew, investigation results) - except a player who is Hitler must admit it if assassinated or elected Chancellor after the 3rd Fascist policy.</p></div>',
       '<div class="panel"><h2>This app</h2><p class="small">Pass the device when prompted so each player sees their secret info privately. The app tracks the board, deck, powers, term limits, and win conditions automatically.</p></div>',
       '<button class="btn primary" data-action="backFromRules">Got it</button>'
     ].join('');
