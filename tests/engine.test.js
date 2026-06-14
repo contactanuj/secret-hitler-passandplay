@@ -406,6 +406,49 @@ ok(SH.partyOf('liberal') === 'Liberal' && SH.partyOf('communist') === 'Communist
 })();
 
 // ---------------------------------------------------------------------------
+section('roles & bots always respect the player count');
+
+// normalizeRoles produces a valid split from ANY starting role counts (incl. broken).
+[5, 6, 7, 8, 9, 10].forEach(function (pc) {
+  for (var f = 0; f <= pc + 3; f++) {
+    for (var cm = 0; cm <= pc + 3; cm++) {
+      var c = SH.defaultConfig(pc);
+      c.roles.fascists = f; c.roles.communists = cm;
+      SH.normalizeRoles(c);
+      var r = c.roles;
+      ok(r.liberals >= 1 && r.fascists >= 1 && r.communists >= 0 &&
+        r.liberals + r.fascists + r.communists + 1 === pc,
+        'normalizeRoles ' + pc + 'p (f=' + f + ',c=' + cm + ') -> valid sum');
+    }
+  }
+});
+
+// enableCommunists is always valid, even toggled on top of an extreme base config.
+[5, 6, 7, 8, 9, 10].forEach(function (pc) {
+  [1, 2, pc - 3, pc - 2, pc].forEach(function (f) {
+    var base = SH.defaultConfig(pc);
+    base.roles.fascists = f; SH.normalizeRoles(base);
+    var c = SH.enableCommunists(base);
+    ok(SH.validateConfig(c).ok, 'enableCommunists ' + pc + 'p (base f=' + f + ') is valid');
+    ok(c.roles.communists >= 1 && c.roles.fascists >= 1 && c.roles.liberals >= 1, pc + 'p XL split sane');
+  });
+});
+
+// toggling communists on then off returns to a valid split.
+[5, 7, 8, 10].forEach(function (pc) {
+  var on = SH.enableCommunists(SH.defaultConfig(pc));
+  on.roles.communists = 0; on.deck.communist = 0; SH.normalizeRoles(on);
+  ok(SH.validateConfig(on).ok && on.roles.communists === 0, pc + 'p communists off -> valid');
+});
+
+// bots must fit within the player count.
+(function () {
+  var c = SH.defaultConfig(7); c.bots = 8; ok(!SH.validateConfig(c).ok, 'bots > players is an error');
+  c.bots = -1; ok(!SH.validateConfig(c).ok, 'negative bots is an error');
+  c.bots = 6; ok(SH.validateConfig(c).ok, 'bots < players is fine');
+})();
+
+// ---------------------------------------------------------------------------
 section('fuzz: full random playthroughs');
 
 function rngInt(n) { return Math.floor(Math.random() * n); }

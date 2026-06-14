@@ -255,6 +255,26 @@ UI.handle('toggleCommunists'); expectRendered('communists on');
 UI.handle('toggleCommunists');
 ok(SH.validateConfig(UI.state().draft).ok, 'communists-off draft is valid');
 
+// config always respects the player count through the UI (normalizeRoles on render)
+[5, 7, 8, 10].forEach(function (pc) {
+  UI.handle('newgame');
+  UI.setDraft(SH.defaultConfig(pc));
+  UI.handle('toggleAdvanced');
+  UI.handle('toggleCommunists'); // on
+  (function () { var d = UI.state().draft; ok(SH.validateConfig(d).ok && d.roles.communists >= 1, pc + 'p communists-on via UI valid'); })();
+  UI.handle('toggleCommunists'); // off
+  (function () { var d = UI.state().draft; ok(SH.validateConfig(d).ok && d.roles.communists === 0, pc + 'p communists-off via UI valid'); })();
+});
+// a deliberately broken role config is auto-normalized on the setup render
+(function () {
+  UI.handle('newgame');
+  var bad = SH.defaultConfig(7); bad.roles.fascists = 6; bad.roles.communists = 4; // sum 6+4+1+? >> 7
+  UI.setDraft(bad); UI.render();
+  var d = UI.state().draft;
+  ok(SH.validateConfig(d).ok && d.roles.liberals + d.roles.fascists + d.roles.communists + 1 === 7,
+    'broken roles auto-normalized to the player count on render');
+})();
+
 // in-game menu + safe re-check role flow (gated, timed, bots excluded)
 (function () {
   var d = SH.defaultConfig(6); d.bots = 2; d.votingMode = 'secret';

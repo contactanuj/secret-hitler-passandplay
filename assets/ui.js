@@ -303,6 +303,8 @@
     if (!draft) draft = newDraft(7);
     resizeNames(draft);
     applyBotSeats(draft);
+    if (draft.bots > draft.playerCount - 1) draft.bots = draft.playerCount - 1; // keep >=1 human
+    SH.normalizeRoles(draft); // roles always sum to the player count (against-the-count is unreachable)
     var v = SH.validateConfig(draft);
     var adv = !!ui.advanced;
     var humanCount = draft.playerCount - (draft.bots || 0);
@@ -388,7 +390,7 @@
       stepperRow('Fascists (excl. Hitler)', 'roles.fascists', d.roles.fascists, 1, fascMax),
       commOn ? '<div class="kv"><span>Communists</span><span><b>' + d.roles.communists + '</b> <span class="small muted">(set below)</span></span></div>' : '',
       '<div class="kv"><span>Hitler</span><span>1</span></div>',
-      '<div class="kv small"><span>Total</span><span>' + d.playerCount + ' / ' + d.playerCount + '</span></div>',
+      '<div class="kv small"><span>Total</span><span>' + (d.roles.liberals + d.roles.fascists + (d.roles.communists || 0) + 1) + ' / ' + d.playerCount + '</span></div>',
       checkboxRow('Hitler knows the Fascists (night phase)', 'hitlerKnowsFascists', d.hitlerKnowsFascists),
 
       '<div class="spacer"></div>',
@@ -1046,9 +1048,8 @@
       case 'resetDefaults': { var pc = draft.playerCount; var names = draft.playerNames.slice(); draft = SH.defaultConfig(pc, names); render(); break; }
       case 'toggleCommunists': {
         if ((draft.roles.communists || 0) > 0) {
-          draft.roles.liberals += draft.roles.communists;
-          draft.roles.communists = 0;
-          draft.deck.communist = 0;
+          draft.roles.communists = 0; draft.deck.communist = 0;
+          SH.normalizeRoles(draft); // Liberals re-absorb the freed seats; sum stays correct
         } else {
           draft = SH.enableCommunists(draft);
         }
@@ -1245,24 +1246,20 @@
     setPath(draft, path, next);
 
     if (path === 'playerCount') {
-      // rebuild from preset for the new count, keep entered names
+      // rebuild from the preset for the new count, but preserve the player's intent
       var names = draft.playerNames.slice();
+      var keepBots = Math.min(draft.bots || 0, next - 1);
+      var keepVoting = draft.votingMode;
+      var hadComm = (draft.roles.communists || 0) > 0;
       draft = SH.defaultConfig(next, names);
-      ui.advanced = ui.advanced; // keep
+      draft.bots = keepBots;
+      draft.votingMode = keepVoting;
+      if (hadComm) draft = SH.enableCommunists(draft);
     }
-    if (path === 'win.fascist') {
-      SH.reconcileBoard(draft); // resize board to match
-    }
-    if (path === 'roles.fascists') {
-      draft.roles.liberals = Math.max(1, draft.playerCount - next - (draft.roles.communists || 0) - 1);
-    }
-    if (path === 'roles.communists') {
-      // keep the head-count summing by taking from / giving back to Liberals
-      draft.roles.liberals = Math.max(1, draft.playerCount - draft.roles.fascists - next - 1);
-    }
-    if (path === 'win.communist') {
-      reconcileCommunistBoard(draft);
-    }
+    if (path === 'win.fascist') SH.reconcileBoard(draft);
+    if (path === 'win.communist') reconcileCommunistBoard(draft);
+    // roles.fascists / roles.communists need no manual fix-up: normalizeRoles() runs on
+    // every setup render and re-derives Liberals so the count always balances.
     if (path === 'bots' && next > 0 && draft.votingMode === 'table') {
       draft.votingMode = 'secret'; // bots can't vote at the table
     }

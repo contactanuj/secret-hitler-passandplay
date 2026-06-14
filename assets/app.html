@@ -373,10 +373,8 @@ select {
   // Balance for the expansion is experimental (validation warns).
   function enableCommunists(config) {
     var c = deepClone(config);
-    var pc = c.playerCount;
-    var comm = pc >= 8 ? 2 : 1;
-    c.roles.communists = comm;
-    c.roles.liberals = Math.max(1, c.roles.liberals - comm);
+    c.roles.communists = c.playerCount >= 8 ? 2 : 1;
+    normalizeRoles(c); // guarantees a valid sum even from an extreme base config
     c.communistsKnowEachOther = true;
     c.deck.communist = 8;
     c.win.communist = 5;
@@ -389,6 +387,27 @@ select {
     if (role === 'liberal') return 'Liberal';
     if (role === 'communist') return 'Communist';
     return 'Fascist'; // fascist or hitler
+  }
+
+  // Force the role split to always respect the player count:
+  //   liberals + fascists + communists + 1 (Hitler) === playerCount,
+  // with liberals >= 1 and fascists >= 1. Fascists/Communists are trimmed if they'd
+  // leave no room for a Liberal + the single Hitler. Liberals auto-fill the remainder.
+  // Idempotent — safe to call on every render so an against-the-count config is
+  // simply unreachable.
+  function normalizeRoles(config) {
+    var pc = config.playerCount, r = config.roles;
+    var fasc = Math.max(1, (r.fascists | 0) || 1);
+    var comm = Math.max(0, (r.communists || 0) | 0);
+    var maxNonLib = Math.max(2, pc - 2); // room for >=1 Liberal + 1 Hitler
+    if (fasc + comm > maxNonLib) {
+      comm = Math.max(0, Math.min(comm, maxNonLib - 1)); // keep fascists >= 1
+      fasc = Math.max(1, maxNonLib - comm);
+    }
+    r.fascists = fasc;
+    r.communists = comm;
+    r.liberals = Math.max(1, pc - fasc - comm - 1);
+    return config;
   }
 
   // Resize/repair a config's board to match the fascist win threshold.
@@ -512,6 +531,14 @@ select {
     // Off-spec player counts: supported, but balance is not guaranteed.
     if (!PRESETS[pc] && pc >= 2) {
       warnings.push('Player count ' + pc + ' is outside the official 5-10 range — playable, but balance is untested.');
+    }
+
+    // Bots must fit within the player count.
+    var bots = c.bots || 0;
+    if (bots < 0 || bots > pc) {
+      errors.push('Bots (' + bots + ') must be between 0 and the player count (' + pc + ').');
+    } else if (bots === pc) {
+      warnings.push('All seats are bots — useful as a demo, but no one is playing.');
     }
 
     // Communist (Secret Hitler XL) expansion checks.
@@ -1126,6 +1153,7 @@ select {
     enableCommunists: enableCommunists,
     partyOf: partyOf,
     reconcileBoard: reconcileBoard,
+    normalizeRoles: normalizeRoles,
     validateConfig: validateConfig,
     newGame: newGame,
     beginPlay: beginPlay,
@@ -1712,6 +1740,8 @@ select {
     if (!draft) draft = newDraft(7);
     resizeNames(draft);
     applyBotSeats(draft);
+    if (draft.bots > draft.playerCount - 1) draft.bots = draft.playerCount - 1; // keep >=1 human
+    SH.normalizeRoles(draft); // roles always sum to the player count (against-the-count is unreachable)
     var v = SH.validateConfig(draft);
     var adv = !!ui.advanced;
     var humanCount = draft.playerCount - (draft.bots || 0);
@@ -1797,7 +1827,7 @@ select {
       stepperRow('Fascists (excl. Hitler)', 'roles.fascists', d.roles.fascists, 1, fascMax),
       commOn ? '<div class="kv"><span>Communists</span><span><b>' + d.roles.communists + '</b> <span class="small muted">(set below)</span></span></div>' : '',
       '<div class="kv"><span>Hitler</span><span>1</span></div>',
-      '<div class="kv small"><span>Total</span><span>' + d.playerCount + ' / ' + d.playerCount + '</span></div>',
+      '<div class="kv small"><span>Total</span><span>' + (d.roles.liberals + d.roles.fascists + (d.roles.communists || 0) + 1) + ' / ' + d.playerCount + '</span></div>',
       checkboxRow('Hitler knows the Fascists (night phase)', 'hitlerKnowsFascists', d.hitlerKnowsFascists),
 
       '<div class="spacer"></div>',
@@ -2455,9 +2485,8 @@ select {
       case 'resetDefaults': { var pc = draft.playerCount; var names = draft.playerNames.slice(); draft = SH.defaultConfig(pc, names); render(); break; }
       case 'toggleCommunists': {
         if ((draft.roles.communists || 0) > 0) {
-          draft.roles.liberals += draft.roles.communists;
-          draft.roles.communists = 0;
-          draft.deck.communist = 0;
+          draft.roles.communists = 0; draft.deck.communist = 0;
+          SH.normalizeRoles(draft); // Liberals re-absorb the freed seats; sum stays correct
         } else {
           draft = SH.enableCommunists(draft);
         }
@@ -2654,24 +2683,20 @@ select {
     setPath(draft, path, next);
 
     if (path === 'playerCount') {
-      // rebuild from preset for the new count, keep entered names
+      // rebuild from the preset for the new count, but preserve the player's intent
       var names = draft.playerNames.slice();
+      var keepBots = Math.min(draft.bots || 0, next - 1);
+      var keepVoting = draft.votingMode;
+      var hadComm = (draft.roles.communists || 0) > 0;
       draft = SH.defaultConfig(next, names);
-      ui.advanced = ui.advanced; // keep
+      draft.bots = keepBots;
+      draft.votingMode = keepVoting;
+      if (hadComm) draft = SH.enableCommunists(draft);
     }
-    if (path === 'win.fascist') {
-      SH.reconcileBoard(draft); // resize board to match
-    }
-    if (path === 'roles.fascists') {
-      draft.roles.liberals = Math.max(1, draft.playerCount - next - (draft.roles.communists || 0) - 1);
-    }
-    if (path === 'roles.communists') {
-      // keep the head-count summing by taking from / giving back to Liberals
-      draft.roles.liberals = Math.max(1, draft.playerCount - draft.roles.fascists - next - 1);
-    }
-    if (path === 'win.communist') {
-      reconcileCommunistBoard(draft);
-    }
+    if (path === 'win.fascist') SH.reconcileBoard(draft);
+    if (path === 'win.communist') reconcileCommunistBoard(draft);
+    // roles.fascists / roles.communists need no manual fix-up: normalizeRoles() runs on
+    // every setup render and re-derives Liberals so the count always balances.
     if (path === 'bots' && next > 0 && draft.votingMode === 'table') {
       draft.votingMode = 'secret'; // bots can't vote at the table
     }

@@ -160,10 +160,8 @@
   // Balance for the expansion is experimental (validation warns).
   function enableCommunists(config) {
     var c = deepClone(config);
-    var pc = c.playerCount;
-    var comm = pc >= 8 ? 2 : 1;
-    c.roles.communists = comm;
-    c.roles.liberals = Math.max(1, c.roles.liberals - comm);
+    c.roles.communists = c.playerCount >= 8 ? 2 : 1;
+    normalizeRoles(c); // guarantees a valid sum even from an extreme base config
     c.communistsKnowEachOther = true;
     c.deck.communist = 8;
     c.win.communist = 5;
@@ -176,6 +174,27 @@
     if (role === 'liberal') return 'Liberal';
     if (role === 'communist') return 'Communist';
     return 'Fascist'; // fascist or hitler
+  }
+
+  // Force the role split to always respect the player count:
+  //   liberals + fascists + communists + 1 (Hitler) === playerCount,
+  // with liberals >= 1 and fascists >= 1. Fascists/Communists are trimmed if they'd
+  // leave no room for a Liberal + the single Hitler. Liberals auto-fill the remainder.
+  // Idempotent — safe to call on every render so an against-the-count config is
+  // simply unreachable.
+  function normalizeRoles(config) {
+    var pc = config.playerCount, r = config.roles;
+    var fasc = Math.max(1, (r.fascists | 0) || 1);
+    var comm = Math.max(0, (r.communists || 0) | 0);
+    var maxNonLib = Math.max(2, pc - 2); // room for >=1 Liberal + 1 Hitler
+    if (fasc + comm > maxNonLib) {
+      comm = Math.max(0, Math.min(comm, maxNonLib - 1)); // keep fascists >= 1
+      fasc = Math.max(1, maxNonLib - comm);
+    }
+    r.fascists = fasc;
+    r.communists = comm;
+    r.liberals = Math.max(1, pc - fasc - comm - 1);
+    return config;
   }
 
   // Resize/repair a config's board to match the fascist win threshold.
@@ -299,6 +318,14 @@
     // Off-spec player counts: supported, but balance is not guaranteed.
     if (!PRESETS[pc] && pc >= 2) {
       warnings.push('Player count ' + pc + ' is outside the official 5-10 range — playable, but balance is untested.');
+    }
+
+    // Bots must fit within the player count.
+    var bots = c.bots || 0;
+    if (bots < 0 || bots > pc) {
+      errors.push('Bots (' + bots + ') must be between 0 and the player count (' + pc + ').');
+    } else if (bots === pc) {
+      warnings.push('All seats are bots — useful as a demo, but no one is playing.');
     }
 
     // Communist (Secret Hitler XL) expansion checks.
@@ -913,6 +940,7 @@
     enableCommunists: enableCommunists,
     partyOf: partyOf,
     reconcileBoard: reconcileBoard,
+    normalizeRoles: normalizeRoles,
     validateConfig: validateConfig,
     newGame: newGame,
     beginPlay: beginPlay,
