@@ -41,3 +41,21 @@ these directly affect game integrity and are prioritized like security bugs.
 
 Never commit signing keystores, `credentials.json`, or API tokens. These are
 git-ignored. The release signing key must be kept private by the maintainer.
+
+## Dependency advisories
+
+Dependabot alerts and security updates are enabled, and `.github/dependabot.yml`
+schedules weekly grouped dependency-update PRs.
+
+Context for the remaining `npm audit` / Dependabot findings: the shipped app is a
+WebView that loads the self-contained `assets/app.html` (original code only), so the
+npm packages are **build-time / local-dev tooling**, not runtime code in the APK.
+
+- `eas-cli` has been removed from `devDependencies` (run it via `npx eas-cli`),
+  which eliminated the critical/high advisories that lived in its dependency tree.
+- The advisories that remain are transitive dependencies inside **Expo SDK 51's**
+  CLI/build tooling (Metro, prebuild, the React Native community CLI, xcode/plist/
+  xmldom, etc.). `npm audit fix` already applies every non-breaking fix; the rest are
+  resolvable only by a **major Expo SDK upgrade** (51 -> current), which is tracked as
+  deliberate future work because it must be migrated and re-tested against a device.
+- None of these are reachable from the running game (no server, no network, offline).
