@@ -2,7 +2,7 @@
   "expo": {
     "name": "Secret Hitler",
     "slug": "secret-hitler",
-    "owner": "snyperdrydan",
+    "owner": "snyper-drydan",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -25,7 +25,7 @@
     },
     "extra": {
       "eas": {
-        "projectId": "9524b3c7-6cd6-4380-b658-717e25295211"
+        "projectId": "06664dbd-4f3b-46c9-8163-91cdba476500"
       }
     }
   }
