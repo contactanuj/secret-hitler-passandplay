@@ -13,14 +13,14 @@
     "react-native"
   ],
   "license": "CC-BY-NC-SA-4.0",
-  "author": "snyperdrydan",
-  "homepage": "https://github.com/snyperdrydan/secret-hitler-passandplay#readme",
+  "author": "Anuj Pratap Singh <anujjadon98@gmail.com>",
+  "homepage": "https://github.com/contactanuj/secret-hitler-passandplay#readme",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/snyperdrydan/secret-hitler-passandplay.git"
+    "url": "git+https://github.com/contactanuj/secret-hitler-passandplay.git"
   },
   "bugs": {
-    "url": "https://github.com/snyperdrydan/secret-hitler-passandplay/issues"
+    "url": "https://github.com/contactanuj/secret-hitler-passandplay/issues"
   },
   "engines": {
     "node": ">=18 <21"

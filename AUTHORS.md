@@ -9,7 +9,7 @@ fan adaptation; all credit for the underlying game design is theirs.
 
 ## This adaptation
 
-- **snyperdrydan** — maintainer / adaptation
+- **Anuj Pratap Singh** ([@contactanuj](https://github.com/contactanuj)) — maintainer / adaptation
 
 Contributors are listed by their commits in the project history. By contributing
 you agree to license your work under CC BY-NC-SA 4.0 (see LICENSE).
