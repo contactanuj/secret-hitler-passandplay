@@ -46,6 +46,6 @@
     "react-native-webview": "13.16.1"
   },
   "devDependencies": {
-    "@babel/core": "^7.24.0"
+    "@babel/core": "^8.0.1"
   }
 }
